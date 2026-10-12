@@ -1,0 +1,22 @@
+# závislosti a sestavení
+node_modules
+dist
+dist-ssr
+*.local
+
+# logy
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# editory a systém
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.sw?
+
+# nasazení
+.vercel
