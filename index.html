@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#F5F6F8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0E151C" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="Trenažér ke zkoušce vedoucího elektrotechnika podle § 7 NV č. 194/2022 Sb. do 1 kV AC / 1,5 kV DC." />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+    />
+    <title>Elektro §7 – trenažér</title>
+    <script>
+      // Ruční volba vzhledu se použije ještě před vykreslením, aby stránka neproblikla.
+      try {
+        var d = JSON.parse(localStorage.getItem("elektro7:v1") || "null");
+        var v = d && d.nastaveni && d.nastaveni.vzhled;
+        if (v === "svetly" || v === "tmavy") document.documentElement.setAttribute("data-tema", v);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
