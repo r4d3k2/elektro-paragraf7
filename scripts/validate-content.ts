@@ -56,6 +56,13 @@ function normalizuj(text: string): string {
     .trim();
 }
 
+/** Český tvar podle počtu: 1 možnost, 2–4 možnosti, 0 a 5+ možností. */
+function tvar(n: number, jeden: string, dvaAzCtyri: string, pet: string): string {
+  if (n === 1) return `${n} ${jeden}`;
+  if (n >= 2 && n <= 4) return `${n} ${dvaAzCtyri}`;
+  return `${n} ${pet}`;
+}
+
 function prazdny(text: string | undefined): boolean {
   return text === undefined || text.trim().length === 0;
 }
@@ -240,11 +247,11 @@ for (const [klic, obsah] of obsahy) {
       otazekVyber++;
       const m = otazka.moznosti;
       if (m.length < 3 || m.length > 4) {
-        chyba(soubor, id, "4 možnosti", `má ${m.length} možností, povoleno je 3–4`);
+        chyba(soubor, id, "4 možnosti", `má ${tvar(m.length, "možnost", "možnosti", "možností")}, povoleno je 3–4`);
       }
       const spravne = m.filter((x) => x.spravna);
       if (spravne.length !== 1) {
-        chyba(soubor, id, "4 možnosti", `má ${spravne.length} správných možností, musí být právě jedna`);
+        chyba(soubor, id, "4 možnosti", `má ${tvar(spravne.length, "správnou možnost", "správné možnosti", "správných možností")}, musí být právě jedna`);
       } else {
         spravnaPismena[spravne[0].id] = (spravnaPismena[spravne[0].id] ?? 0) + 1;
       }
@@ -279,7 +286,7 @@ for (const [klic, obsah] of obsahy) {
     } else if (otazka.typ === "poradi") {
       const polozky = otazka.polozky;
       if (polozky.length < 4 || polozky.length > 7) {
-        chyba(soubor, id, "5 pořadí", `má ${polozky.length} položek, povoleno je 4–7`);
+        chyba(soubor, id, "5 pořadí", `má ${tvar(polozky.length, "položku", "položky", "položek")}, povoleno je 4–7`);
       }
       const idPolozek = polozky.map((p) => p.id);
       const mnozina = new Set(idPolozek);
@@ -337,10 +344,10 @@ for (const [klic, obsah] of obsahy) {
   if (kapitola && kapitola.faze <= AKTUALNI_FAZE) {
     const min = MINIMA[kapitola.id];
     if (obsah.lekce.length < min.karty) {
-      chyba(soubor, klic, "12 minimální počty", `má ${obsah.lekce.length} karet, minimum je ${min.karty}`);
+      chyba(soubor, klic, "12 minimální počty", `má ${tvar(obsah.lekce.length, "kartu", "karty", "karet")}, minimum je ${min.karty}`);
     }
     if (obsah.otazky.length < min.otazky) {
-      chyba(soubor, klic, "12 minimální počty", `má ${obsah.otazky.length} otázek, minimum je ${min.otazky}`);
+      chyba(soubor, klic, "12 minimální počty", `má ${tvar(obsah.otazky.length, "otázku", "otázky", "otázek")}, minimum je ${min.otazky}`);
     }
     const podil3 = obsah.otazky.length > 0 ? obtiznost[2] / obsah.otazky.length : 0;
     if (podil3 < MIN_PODIL_OBTIZNOST_3) {

@@ -86,7 +86,9 @@ export function Procvicovani({ kapitola, obsah, dotaz }: Props) {
                   key={r.id}
                   type="button"
                   aria-pressed={aktivni}
-                  onClick={() => (aktivni ? setKolo((k) => k + 1) : zmenFiltr(podtema, r.id))}
+                  onClick={() => {
+                    if (!aktivni) zmenFiltr(podtema, r.id);
+                  }}
                   className={`min-h-11 rounded-md px-2 text-sm font-medium transition-colors duration-150 ${
                     aktivni ? "bg-primarni text-na-primarni" : "text-text hover:bg-plocha-2"
                   }`}

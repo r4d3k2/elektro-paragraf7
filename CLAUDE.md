@@ -39,4 +39,7 @@ React + TypeScript (strict) + Vite + Tailwind CSS v4 (`@tailwindcss/vite`), skri
 - Nepoužívat emoji v rozhraní.
 
 ## Stav projektu
-- Fáze 1: rozpracováno (na konci každé fáze tento oddíl aktualizuj)
+- Fáze 1: hotovo (2026-10-12). Kostra, validátor (prebuild), obsah k1 (10 karet, 24 otázek) a k2 (10 karet, 29 otázek), obrazovky Domů / Kapitola / Nauka / Procvičování / O aplikaci, ilustrace `zebricek-zpusobilosti`, `lhuty-revizi`, `kod-opravneni`.
+- Fáze 2: nezačato (`AKTUALNI_FAZE = 1`).
+- Poznámky pro další fáze: validátor už kontroluje i typ `poradi` (sekce 5, bod 5), UI pro něj chybí (Fáze 3) a Procvičování zatím bere jen otázky `vyber`. Pomocné soubory mimo strukturu ze specifikace: `src/lib/obsah.ts`, `src/lib/vzhled.ts`, `src/lib/format.ts`, `src/components/styly.ts`, `src/components/IlustraceBlok.tsx`, `src/ilustrace/ovladani.tsx`, `src/data/obsah/md.ts`. Barvy v SVG ilustracích se zadávají třídami (`fill-…`, `stroke-…`), ne `var()` v atributech.
+- Na konci každé fáze tento oddíl aktualizuj.
