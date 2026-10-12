@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "validate": "tsx scripts/validate-content.ts",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
