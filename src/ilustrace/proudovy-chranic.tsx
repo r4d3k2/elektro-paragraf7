@@ -105,17 +105,17 @@ export default function ProudovyChranic() {
           spoušť
         </text>
         <line x1={170} y1={122} x2={174} y2={Y_N + 4} strokeWidth={1.5} strokeDasharray="3 3" className="stroke-tlumeny" />
-        <text x={186} y={82} fontSize={10.5} textAnchor="middle" className={vybaveno ? "fill-spatne font-mono" : "fill-text font-mono"} fontWeight={600}>
+        <text x={135} y={83} fontSize={10.5} textAnchor="middle" className={vybaveno ? "fill-spatne font-mono" : "fill-text font-mono"} fontWeight={600}>
           {vybaveno ? "vypnuto" : `Δ ${unik} mA`}
         </text>
 
         {/* spotřebič a jeho kryt */}
         <g opacity={tlumit}>
           <rect x={X_SPOTREBIC} y={38} width={86} height={84} rx={8} strokeWidth={3} className="fill-plocha stroke-text" />
-          <text x={X_SPOTREBIC + 43} y={74} fontSize={11} textAnchor="middle" className="fill-text">
+          <text x={X_SPOTREBIC + 52} y={104} fontSize={11} textAnchor="middle" className="fill-text">
             spotřebič
           </text>
-          <text x={X_SPOTREBIC + 43} y={88} fontSize={10} textAnchor="middle" className="fill-tlumeny">
+          <text x={X_SPOTREBIC + 52} y={116} fontSize={10} textAnchor="middle" className="fill-tlumeny">
             kovový kryt
           </text>
         </g>
@@ -175,7 +175,7 @@ export default function ProudovyChranic() {
         {/* blesk = porucha izolace na kryt */}
         {unik > 0 && (
           <path
-            d={`M${X_SPOTREBIC + 14} ${Y_L + 6} l10 14 -8 2 10 16`}
+            d={`M${X_SPOTREBIC + 8} ${Y_L + 4} l8 10 -6 2 8 12`}
             fill="none"
             strokeWidth={2.5}
             strokeLinejoin="round"

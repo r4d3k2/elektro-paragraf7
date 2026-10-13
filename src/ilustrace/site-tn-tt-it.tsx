@@ -217,13 +217,13 @@ function Schema({ sit, porucha }: { sit: SitId; porucha: boolean }) {
             nebo přes Z
           </text>
           {/* hlídač izolačního stavu */}
-          <line x1={120} y1={Y.L3} x2={120} y2={192} strokeWidth={1.2} className="stroke-text" />
-          <Uzel x={120} y={Y.L3} />
-          <rect x={84} y={192} width={72} height={22} rx={4} strokeWidth={1.5} className="fill-plocha stroke-primarni" />
-          <text x={120} y={207} fontSize={9.5} textAnchor="middle" className="fill-primarni">
+          <line x1={110} y1={Y.L3} x2={110} y2={192} strokeWidth={1.2} className="stroke-text" />
+          <Uzel x={110} y={Y.L3} />
+          <rect x={74} y={192} width={72} height={22} rx={4} strokeWidth={1.5} className="fill-plocha stroke-primarni" />
+          <text x={110} y={207} fontSize={9.5} textAnchor="middle" className="fill-primarni">
             hlídač izolace
           </text>
-          <line x1={120} y1={214} x2={120} y2={Y_ZEM} strokeWidth={1.2} className="stroke-text" />
+          <line x1={110} y1={214} x2={110} y2={Y_ZEM} strokeWidth={1.2} className="stroke-text" />
         </>
       ) : (
         <>
@@ -293,11 +293,11 @@ function Schema({ sit, porucha }: { sit: SitId; porucha: boolean }) {
 
       {/* spotřebič třídy I: kovová kostra (neživá část) a zátěž */}
       <rect x={k.x} y={k.y} width={k.w} height={k.h} rx={6} strokeWidth={3} className="fill-plocha stroke-text" />
-      <text x={k.x + k.w / 2} y={k.y + 14} fontSize={9.5} textAnchor="middle" className="fill-tlumeny">
+      <rect x={240} y={160} width={58} height={18} rx={3} strokeWidth={1.5} className="fill-plocha-2 stroke-text" />
+      <text x={k.x + k.w / 2} y={k.y + k.h - 8} fontSize={9.5} textAnchor="middle" className="fill-text">
         spotřebič třídy I
       </text>
-      <rect x={240} y={160} width={58} height={18} rx={3} strokeWidth={1.5} className="fill-plocha-2 stroke-text" />
-      <text x={k.x + k.w / 2} y={k.y + k.h - 7} fontSize={9.5} textAnchor="middle" className="fill-tlumeny">
+      <text x={k.x - 6} y={k.y + k.h - 4} fontSize={9.5} textAnchor="end" className="fill-tlumeny">
         kovová kostra
       </text>
 
@@ -367,11 +367,11 @@ function Schema({ sit, porucha }: { sit: SitId; porucha: boolean }) {
             strokeLinejoin="round"
             className="stroke-spatne"
           />
-          <text x={k.x - 6} y={k.y + 30} fontSize={10} fontWeight={600} textAnchor="end" className="fill-spatne">
+          <text x={k.x - 6} y={k.y + 14} fontSize={10} fontWeight={600} textAnchor="end" className="fill-spatne">
             porucha
           </text>
           {sit === "IT" && (
-            <text x={200} y={Y_ZEM - 6} fontSize={9.5} textAnchor="middle" className="fill-spatne">
+            <text x={186} y={Y_ZEM - 6} fontSize={9.5} textAnchor="middle" className="fill-spatne">
               malý proud
             </text>
           )}

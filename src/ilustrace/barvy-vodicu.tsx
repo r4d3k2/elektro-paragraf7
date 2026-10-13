@@ -206,7 +206,8 @@ export default function BarvyVodicu() {
               {id === "cerna" && (
                 <circle cx={x} cy={y} r={R_ZILA} fill="none" strokeWidth={1.5} className="stroke-vodic-cerna-obrys" />
               )}
-              <circle cx={x} cy={y} r={R_ZILA - 10} strokeWidth={1} className="fill-plocha stroke-tlumeny" />
+              <circle cx={x} cy={y} r={R_ZILA - 10} className="fill-plocha" />
+              <circle cx={x} cy={y} r={R_ZILA - 10} strokeWidth={1} fillOpacity={0.45} className="fill-tlumeny stroke-tlumeny" />
               {(zvolena || fokus === id) && (
                 <circle
                   cx={x}
