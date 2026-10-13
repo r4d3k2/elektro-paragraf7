@@ -68,8 +68,10 @@ export function OAplikaci() {
 
       <Sekce nadpis="Rozsah">
         <p>
-          Napětí do 1 kV AC / 1,5 kV DC, objekty bez nebezpečí výbuchu. Látka je v 9 kapitolách v pevném pořadí.
-          Teď jsou zpřístupněné kapitoly {vycetKapitol(aktivni)} (fáze {AKTUALNI_FAZE}), další přibudou.
+          Napětí do 1 kV AC / 1,5 kV DC, objekty bez nebezpečí výbuchu. Látka je v 9 kapitolách v pevném pořadí.{" "}
+          {aktivni.length === KAPITOLY.length
+            ? `Zpřístupněné jsou všechny kapitoly (fáze ${AKTUALNI_FAZE}).`
+            : `Teď jsou zpřístupněné kapitoly ${vycetKapitol(aktivni)} (fáze ${AKTUALNI_FAZE}), další přibudou.`}
         </p>
       </Sekce>
 
