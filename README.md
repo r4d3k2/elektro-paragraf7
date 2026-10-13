@@ -6,20 +6,21 @@
 
 ## Stav
 
-Hotové jsou **Fáze 1 a 2**:
+Hotové jsou **Fáze 1, 2 a 3**:
 
-- kapitoly 1–5: Legislativa a odborná způsobilost; Vyhrazená elektrická zařízení a revize; Organizace práce a odpovědnosti; Bezpečná práce na elektrických zařízeních; Účinky proudu a první pomoc,
+- všech 9 kapitol: Legislativa a odborná způsobilost; Vyhrazená elektrická zařízení a revize; Organizace práce a odpovědnosti; Bezpečná práce na elektrických zařízeních; Účinky proudu a první pomoc; Ochrana před úrazem elektrickým proudem; Sítě, uzemnění a značení vodičů; Vnější vlivy, krytí a zvláštní prostory; Revize a měření v praxi,
 - obrazovky Domů, Kapitola, Nauka, Procvičování, Test kapitoly (10 otázek ze všech podtémat, hranice 80 %, rozbor s vysvětleními) a O aplikaci,
-- interaktivní ilustrace: žebříček způsobilosti, lhůty revizí, kód oprávnění, pokyny – dohled – dozor, pět pravidel práce bez napětí, pásma kolem živé části a metronom pro resuscitaci.
+- otázky s výběrem odpovědi i otázky na seřazení (položky se přesouvají šipkami, po potvrzení se ukáže správné pořadí s vyznačenými chybami),
+- interaktivní ilustrace: žebříček způsobilosti, lhůty revizí, kód oprávnění, pokyny – dohled – dozor, pět pravidel práce bez napětí, pásma kolem živé části, metronom pro resuscitaci, sítě TN/TT/IT s poruchou na kostře, proudový chránič, barvy vodičů, IP kód a pořadí zkoušek a měření.
 
-Kapitoly 6–9, otázky na seřazení, zkouška nanečisto a offline režim přijdou v dalších fázích podle specifikace.
+Zkouška nanečisto, opakování chyb, přehled a offline režim přijdou ve Fázi 4 podle specifikace.
 
 ## Příkazy
 
 | Příkaz | Co dělá |
 | --- | --- |
 | `npm install` | nainstaluje závislosti podle `package-lock.json` |
-| `npm run dev` | spustí vývojový server Vite |
+| `npm run dev` | spustí vývojový server Vite (v Claude Code Desktop ho spravuje Preview) |
 | `npm run validate` | zkontroluje obsah (`scripts/validate-content.ts`) a vypíše statistiky |
 | `npm run build` | validátor (prebuild), kontrola typů (`tsc -b`) a produkční sestavení do `dist/` |
 | `npm run preview` | náhled sestavené verze |

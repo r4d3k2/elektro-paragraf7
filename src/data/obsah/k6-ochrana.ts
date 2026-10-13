@@ -232,7 +232,7 @@ const obsah: ObsahKapitoly = {
       typ: "vyber",
       obtiznost: 3,
       zadani:
-        "Investor chce v dílně ušetřit: zásuvkové obvody osadíte chráničem 30 mA a ochranu při poruše prý už řešit nemusíte. Co mu odpovíte?",
+        "Investor chce v dílně ušetřit: zásuvkové obvody osadíte chráničem 30 mA, a ochrana při poruše tak prý bude zbytečná. Co mu odpovíte?",
       moznosti: [
         {
           id: "a",
@@ -554,7 +554,7 @@ const obsah: ObsahKapitoly = {
       typ: "vyber",
       obtiznost: 3,
       zadani:
-        "Při rekonstrukci bytu podle současných norem chce investor proudový chránič 30 mA jen na zásuvkové obvody. Světla prý chránit nemusíte. Co mu řeknete?",
+        "Při rekonstrukci bytu podle současných norem chce investor proudový chránič 30 mA jen na zásuvkové obvody, světelné obvody chce nechat bez chrániče. Co mu řeknete?",
       moznosti: [
         {
           id: "a",

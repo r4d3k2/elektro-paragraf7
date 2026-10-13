@@ -204,7 +204,7 @@ const obsah: ObsahKapitoly = {
       typ: "vyber",
       obtiznost: 3,
       zadani:
-        "Chystáte podklady k pravidelné revizi výrobní haly. Protokol o určení vnějších vlivů nikdo nemůže najít a kolega navrhuje revizi bez něj – prý se týkal jen výchozí revize. Co platí?",
+        "Chystáte podklady k pravidelné revizi výrobní haly. Protokol o určení vnějších vlivů se ztratil a kolega navrhuje revizi bez něj – prý se týkal jen výchozí revize. Co platí?",
       moznosti: [
         {
           id: "a",
@@ -401,7 +401,7 @@ const obsah: ObsahKapitoly = {
       typ: "vyber",
       obtiznost: 3,
       zadani:
-        "Do skladu cementu vybíráte svítidlo. Provozovatel chce, aby do něj prach nevnikl vůbec. Které krytí zvolíte?",
+        "Do skladu cementu vybíráte svítidlo. Provozovatel chce co nejvyšší ochranu před prachem. Které krytí zvolíte?",
       moznosti: [
         {
           id: "a",
@@ -430,7 +430,7 @@ const obsah: ObsahKapitoly = {
             "Druhá číslice se týká vody. Ochranu před prachem vyjadřuje první číslice; prachotěsné je IP6X."
         }
       ],
-      shrnuti: "Prach nesmí dovnitř vůbec? IP6X (prachotěsné), ne jen IP5X.",
+      shrnuti: "Nejvyšší ochrana před prachem je IP6X (prachotěsné); IP5X je jen ochrana před prachem.",
       fakta: ["K8-06", "K8-05"]
     },
 
@@ -601,7 +601,7 @@ const obsah: ObsahKapitoly = {
       typ: "vyber",
       obtiznost: 3,
       zadani:
-        "Projekt myčky aut s tryskající vodou řadí její elektrické zařízení do I. třídy. Provozovatel namítá, že objekt není pro více než 200 osob, takže jde o II. třídu. Co mu odpovíte?",
+        "Projekt myčky aut s tryskající vodou řadí její elektrické zařízení do I. třídy. Provozovatel namítá, že objekt je jen pro pár zákazníků, takže jde o II. třídu. Co mu odpovíte?",
       moznosti: [
         {
           id: "a",

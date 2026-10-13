@@ -352,7 +352,7 @@ const obsah: ObsahKapitoly = {
       podtema: "prohlidka",
       typ: "vyber",
       obtiznost: 2,
-      zadani: "Která z těchto kontrol patří do prohlídky, a ne do zkoušek a měření?",
+      zadani: "Která z těchto kontrol patří do prohlídky?",
       moznosti: [
         {
           id: "a",
@@ -393,7 +393,7 @@ const obsah: ObsahKapitoly = {
       typ: "vyber",
       obtiznost: 3,
       zadani:
-        "Při revizi strojovny nejde jeden bod zkoušek podle přílohy č. 1 technicky provést. Revizní technik se ptá, jak postupovat. Co platí?",
+        "Při revizi strojovny je jeden bod zkoušek podle přílohy č. 1 technicky neproveditelný. Revizní technik se ptá, jak postupovat. Co platí?",
       moznosti: [
         {
           id: "a",
@@ -700,7 +700,7 @@ const obsah: ObsahKapitoly = {
       typ: "vyber",
       obtiznost: 3,
       zadani:
-        "Revizní technik při revizi elektroinstalace kotelny nezkoušel tlačítko nouzového vypnutí u vstupu. Prý stačí, že ho prohlédl. Co platí?",
+        "Revizní technik při revizi elektroinstalace kotelny u tlačítka nouzového vypnutí u vstupu provedl jen prohlídku. Prý to stačí. Co platí?",
       moznosti: [
         {
           id: "a",
