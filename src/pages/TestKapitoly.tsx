@@ -1,17 +1,21 @@
 // #/k/:id/test – test kapitoly: 10 otázek (nebo všechny, je-li jich méně), pokrývá všechna podtémata,
 // seřazené podle podtémat. Zpětná vazba až na konci, hranice úspěchu 80 %. Výsledek se uloží do pokroku,
 // rozbor ukáže vysvětlení u všech možností. Rozpracovaný test přežije obnovení stránky (lib/test.ts).
+// Test obsahuje otázky obou typů: „vyber“ i „poradi“.
 import { useEffect, useMemo, useState } from "react";
 import type { Kapitola } from "../data/kapitoly";
-import type { Moznost, ObsahKapitoly, OtazkaVyber } from "../data/typy";
+import type { Moznost, ObsahKapitoly, Otazka, OtazkaPoradi, OtazkaVyber } from "../data/typy";
 import { Icon } from "../components/Icon";
 import { Layout } from "../components/Layout";
 import { OdznakOverit } from "../components/OdznakOverit";
-import { OtazkaView, PISMENA, POPIS_OBTIZNOSTI, useZobrazeneMoznosti } from "../components/OtazkaView";
+import { HlavickaOtazky } from "../components/OtazkaCasti";
+import { OtazkaView, PISMENA, useZobrazeneMoznosti } from "../components/OtazkaView";
+import { PoradiSeznam, useVychoziPoradi } from "../components/PoradiView";
 import { Pruh } from "../components/Pruh";
 import { nadpisSekce, plocha, tlacitkoPrimarni, tlacitkoSekundarni, tlacitkoTiche } from "../components/styly";
 import { maOverit, nejblizsiKarta } from "../lib/fakta";
 import { nazevPodtematu } from "../lib/obsah";
+import { jeSpravnaOdpoved, type Odpoved } from "../lib/odpovedi";
 import { pokrok, usePokrok } from "../lib/progress";
 import { odkaz } from "../lib/route";
 import {
@@ -32,8 +36,8 @@ interface Props {
 }
 
 interface Vysledek {
-  otazky: OtazkaVyber[];
-  odpovedi: Partial<Record<string, Moznost["id"]>>;
+  otazky: Otazka[];
+  odpovedi: Partial<Record<string, Odpoved>>;
 }
 
 function procenta(skore: number, celkem: number): number {
@@ -46,8 +50,8 @@ function formatDatum(iso: string): string {
   return `${d.getDate()}. ${d.getMonth() + 1}. ${d.getFullYear()}`;
 }
 
-function jeSpravne(otazka: OtazkaVyber, odpoved: Moznost["id"] | undefined): boolean {
-  return odpoved !== undefined && otazka.moznosti.some((m) => m.id === odpoved && m.spravna);
+function otazkyTestu(obsah: ObsahKapitoly, ids: string[]): Otazka[] {
+  return ids.map((id) => obsah.otazky.find((o) => o.id === id)).filter((o): o is Otazka => o !== undefined);
 }
 
 export function TestKapitoly({ kapitola, obsah }: Props) {
@@ -79,12 +83,10 @@ export function TestKapitoly({ kapitola, obsah }: Props) {
   }
 
   function vyhodnot(test: RozpracovanyTest) {
-    const otazky = test.ids
-      .map((id) => obsah.otazky.find((o) => o.id === id))
-      .filter((o): o is OtazkaVyber => o?.typ === "vyber");
+    const otazky = otazkyTestu(obsah, test.ids);
     pokrok.dokonciTest(
       kapitola.id,
-      otazky.map((o) => ({ idOtazky: o.id, spravne: jeSpravne(o, test.odpovedi[o.id]) }))
+      otazky.map((o) => ({ idOtazky: o.id, spravne: jeSpravnaOdpoved(o, test.odpovedi[o.id]) }))
     );
     smazRozpracovany(kapitola.id);
     setBeh(null);
@@ -199,13 +201,7 @@ interface BehProps {
 
 function BehTestu({ obsah, test, onZmena, onVyhodnot, onZrus }: BehProps) {
   const [potvrditZruseni, setPotvrditZruseni] = useState(false);
-  const otazky = useMemo(
-    () =>
-      test.ids
-        .map((id) => obsah.otazky.find((o) => o.id === id))
-        .filter((o): o is OtazkaVyber => o?.typ === "vyber"),
-    [obsah, test.ids]
-  );
+  const otazky = useMemo(() => otazkyTestu(obsah, test.ids), [obsah, test.ids]);
   const otazka = otazky[test.index];
   if (!otazka) return null;
 
@@ -229,13 +225,23 @@ function BehTestu({ obsah, test, onZmena, onVyhodnot, onZrus }: BehProps) {
       </div>
 
       <div className="mt-4">
-        <TestOtazka
-          key={otazka.id}
-          otazka={otazka}
-          nazevPodtematu={nazevPodtematu(obsah, otazka.podtema)}
-          zvoleno={zvoleno}
-          onZvol={(id) => onZmena({ ...test, odpovedi: { ...test.odpovedi, [otazka.id]: id } })}
-        />
+        {otazka.typ === "poradi" ? (
+          <TestOtazkaPoradi
+            key={otazka.id}
+            otazka={otazka}
+            nazevPodtematu={nazevPodtematu(obsah, otazka.podtema)}
+            zvoleno={Array.isArray(zvoleno) ? zvoleno : undefined}
+            onZvol={(poradi) => onZmena({ ...test, odpovedi: { ...test.odpovedi, [otazka.id]: poradi } })}
+          />
+        ) : (
+          <TestOtazka
+            key={otazka.id}
+            otazka={otazka}
+            nazevPodtematu={nazevPodtematu(obsah, otazka.podtema)}
+            zvoleno={typeof zvoleno === "string" ? zvoleno : undefined}
+            onZvol={(id) => onZmena({ ...test, odpovedi: { ...test.odpovedi, [otazka.id]: id } })}
+          />
+        )}
       </div>
 
       <div className="mt-8 border-t border-hrana pt-4">
@@ -320,14 +326,7 @@ function TestOtazka({ otazka, nazevPodtematu, zvoleno, onZvol }: TestOtazkaProps
   const zobrazene = useZobrazeneMoznosti(otazka);
   return (
     <article aria-labelledby={`zadani-${otazka.id}`}>
-      <div className="flex flex-wrap items-center gap-2 text-xs text-tlumeny">
-        <span className="font-medium">{nazevPodtematu}</span>
-        <span aria-hidden="true">·</span>
-        <span>{POPIS_OBTIZNOSTI[otazka.obtiznost]}</span>
-      </div>
-      <h2 id={`zadani-${otazka.id}`} className="mt-2 text-lg leading-snug font-semibold">
-        {otazka.zadani}
-      </h2>
+      <HlavickaOtazky otazka={otazka} nazevPodtematu={nazevPodtematu} />
       <ul className="mt-4 space-y-2.5">
         {zobrazene.map((m, i) => {
           const zvolena = m.id === zvoleno;
@@ -360,6 +359,39 @@ function TestOtazka({ otazka, nazevPodtematu, zvoleno, onZvol }: TestOtazkaProps
   );
 }
 
+interface TestOtazkaPoradiProps {
+  otazka: OtazkaPoradi;
+  nazevPodtematu: string;
+  zvoleno: string[] | undefined;
+  onZvol: (poradi: string[]) => void;
+}
+
+/**
+ * Otázka na seřazení v testu: každý přesun se hned uloží jako odpověď. Pořadí lze přijmout i beze změny
+ * tlačítkem „Potvrdit toto pořadí“. Správnost se neukazuje.
+ */
+function TestOtazkaPoradi({ otazka, nazevPodtematu, zvoleno, onZvol }: TestOtazkaPoradiProps) {
+  const vychozi = useVychoziPoradi(otazka);
+  const poradi = zvoleno ?? vychozi;
+  return (
+    <article aria-labelledby={`zadani-${otazka.id}`}>
+      <HlavickaOtazky otazka={otazka} nazevPodtematu={nazevPodtematu} />
+      <p className="mt-2 text-sm text-tlumeny">Seřaďte položky šipkami od první po poslední.</p>
+      <div className="mt-4">
+        <PoradiSeznam otazka={otazka} poradi={poradi} onZmena={onZvol} />
+      </div>
+      {zvoleno === undefined ? (
+        <button type="button" onClick={() => onZvol(poradi)} className={`${tlacitkoSekundarni} mt-4 w-full`}>
+          <Icon nazev="spravne" size={18} />
+          Potvrdit toto pořadí
+        </button>
+      ) : (
+        <p className="mt-3 text-sm text-tlumeny">Pořadí je uložené. Měnit ho můžete až do vyhodnocení testu.</p>
+      )}
+    </article>
+  );
+}
+
 // ─── Výsledek a rozbor ──────────────────────────────────────────────────
 
 interface VysledekProps {
@@ -373,7 +405,7 @@ function VysledekTestu({ kapitola, obsah, vysledek, onZnovu }: VysledekProps) {
   const zaklad = `/k/${kapitola.id}`;
   const { otazky, odpovedi } = vysledek;
   const celkem = otazky.length;
-  const skore = otazky.filter((o) => jeSpravne(o, odpovedi[o.id])).length;
+  const skore = otazky.filter((o) => jeSpravnaOdpoved(o, odpovedi[o.id])).length;
   const ok = uspel(skore, celkem);
   const chyb = celkem - skore;
 
@@ -384,7 +416,7 @@ function VysledekTestu({ kapitola, obsah, vysledek, onZnovu }: VysledekProps) {
         id: p.id,
         nazev: p.nazev,
         celkem: vPodtematu.length,
-        spravne: vPodtematu.filter((o) => jeSpravne(o, odpovedi[o.id])).length
+        spravne: vPodtematu.filter((o) => jeSpravnaOdpoved(o, odpovedi[o.id])).length
       };
     })
     .filter((p) => p.celkem > 0);
@@ -458,7 +490,7 @@ function VysledekTestu({ kapitola, obsah, vysledek, onZnovu }: VysledekProps) {
         </p>
         <ol className="mt-3 space-y-3">
           {otazky.map((o, i) => {
-            const spravne = jeSpravne(o, odpovedi[o.id]);
+            const spravne = jeSpravnaOdpoved(o, odpovedi[o.id]);
             const karta = nejblizsiKarta(obsah.lekce, o);
             return (
               <li key={o.id}>

@@ -1,20 +1,14 @@
-// Otázka typu „vyber“ se zpětnou vazbou podle sekce 6 specifikace.
+// Otázka se zpětnou vazbou podle sekce 6 specifikace. Typ „vyber“ je tady, typ „poradi“ v PoradiView.tsx.
 // S odpovedPredem se zobrazí rovnou vyhodnocená (rozbor testu kapitoly).
 import { useMemo, useRef, useState } from "react";
-import type { Moznost, OtazkaVyber } from "../data/typy";
-import { maOverit } from "../lib/fakta";
+import type { Moznost, Otazka, OtazkaVyber } from "../data/typy";
+import type { Odpoved } from "../lib/odpovedi";
 import { poradiMoznosti } from "../lib/shuffle";
-import { Zdroje } from "./FaktChip";
 import { Icon } from "./Icon";
-import { OdznakOverit } from "./OdznakOverit";
-import { nadpisSekce } from "./styly";
+import { HlavickaOtazky, ZaverOtazky } from "./OtazkaCasti";
+import { PoradiView } from "./PoradiView";
 
 export const PISMENA = ["A", "B", "C", "D"];
-export const POPIS_OBTIZNOSTI: Record<1 | 2 | 3, string> = {
-  1: "Pojem",
-  2: "Souvislosti",
-  3: "Situace z praxe"
-};
 
 /** Možnosti v zamíchaném pořadí, které zůstává stejné po celou relaci (Fisher–Yates, shuffle.ts). */
 export function useZobrazeneMoznosti(otazka: OtazkaVyber): Moznost[] {
@@ -30,16 +24,32 @@ export function useZobrazeneMoznosti(otazka: OtazkaVyber): Moznost[] {
 }
 
 interface Props {
-  otazka: OtazkaVyber;
+  otazka: Otazka;
   nazevPodtematu?: string;
   /** Odkaz na kartu nauky, která s otázkou sdílí nejvíc faktů. */
   odkazNauka?: string;
   onOdpoved?: (spravne: boolean) => void;
-  /** Už zvolená odpověď – otázka se zobrazí vyhodnocená a zamčená. */
+  /** Už daná odpověď – otázka se zobrazí vyhodnocená a zamčená. */
+  odpovedPredem?: Odpoved;
+}
+
+export function OtazkaView({ otazka, odpovedPredem, ...ostatni }: Props) {
+  if (otazka.typ === "poradi") {
+    return (
+      <PoradiView otazka={otazka} odpovedPredem={Array.isArray(odpovedPredem) ? odpovedPredem : undefined} {...ostatni} />
+    );
+  }
+  return (
+    <VyberView otazka={otazka} odpovedPredem={typeof odpovedPredem === "string" ? odpovedPredem : undefined} {...ostatni} />
+  );
+}
+
+interface VyberProps extends Omit<Props, "otazka" | "odpovedPredem"> {
+  otazka: OtazkaVyber;
   odpovedPredem?: Moznost["id"];
 }
 
-export function OtazkaView({ otazka, nazevPodtematu, odkazNauka, onOdpoved, odpovedPredem }: Props) {
+function VyberView({ otazka, nazevPodtematu, odkazNauka, onOdpoved, odpovedPredem }: VyberProps) {
   const zobrazene = useZobrazeneMoznosti(otazka);
   const [zvoleno, setZvoleno] = useState<Moznost["id"] | null>(odpovedPredem ?? null);
   const vysledek = useRef<HTMLDivElement>(null);
@@ -70,14 +80,7 @@ export function OtazkaView({ otazka, nazevPodtematu, odkazNauka, onOdpoved, odpo
 
   return (
     <article aria-labelledby={`zadani-${otazka.id}`}>
-      <div className="flex flex-wrap items-center gap-2 text-xs text-tlumeny">
-        {nazevPodtematu && <span className="font-medium">{nazevPodtematu}</span>}
-        <span aria-hidden="true">·</span>
-        <span>{POPIS_OBTIZNOSTI[otazka.obtiznost]}</span>
-      </div>
-      <h2 id={`zadani-${otazka.id}`} className="mt-2 text-lg leading-snug font-semibold">
-        {otazka.zadani}
-      </h2>
+      <HlavickaOtazky otazka={otazka} nazevPodtematu={nazevPodtematu} />
 
       <ul className="mt-4 space-y-2.5">
         {zobrazene.map((m) => {
@@ -162,28 +165,7 @@ export function OtazkaView({ otazka, nazevPodtematu, odkazNauka, onOdpoved, odpo
             ))}
           </section>
 
-          <section className="rounded-xl border border-primarni/30 bg-primarni/5 p-4">
-            <h3 className={nadpisSekce}>Shrnutí</h3>
-            <p className="mt-1.5 font-medium">{otazka.shrnuti}</p>
-          </section>
-
-          {maOverit(otazka.fakta) && (
-            <div className="space-y-1.5">
-              <OdznakOverit />
-              <p className="text-sm text-tlumeny">
-                Otázka se opírá o údaj, který je potřeba potvrdit v aktuálním znění normy.
-              </p>
-            </div>
-          )}
-
-          <Zdroje fakta={otazka.fakta} />
-
-          {odkazNauka && (
-            <a href={odkazNauka} className="inline-flex min-h-11 items-center gap-2 font-medium text-primarni">
-              <Icon nazev="nauka" size={18} />
-              Zpět do nauky
-            </a>
-          )}
+          <ZaverOtazky otazka={otazka} odkazNauka={odkazNauka} />
         </div>
       )}
     </article>

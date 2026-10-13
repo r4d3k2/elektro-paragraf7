@@ -20,3 +20,6 @@ yarn-error.log*
 
 # nasazení
 .vercel
+
+# Claude Code Desktop
+.claude/worktrees/

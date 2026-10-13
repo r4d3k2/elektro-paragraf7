@@ -7,11 +7,19 @@ import k2 from "./k2-vtz-revize";
 import k3 from "./k3-organizace";
 import k4 from "./k4-bezpecna-prace";
 import k5 from "./k5-prvni-pomoc";
+import k6 from "./k6-ochrana";
+import k7 from "./k7-site-vodice";
+import k8 from "./k8-prostory";
+import k9 from "./k9-revize-mereni";
 
 export const OBSAH: Partial<Record<KapitolaId, ObsahKapitoly>> = {
   "k1-legislativa": k1,
   "k2-vtz-revize": k2,
   "k3-organizace": k3,
   "k4-bezpecna-prace": k4,
-  "k5-prvni-pomoc": k5
+  "k5-prvni-pomoc": k5,
+  "k6-ochrana": k6,
+  "k7-site-vodice": k7,
+  "k8-prostory": k8,
+  "k9-revize-mereni": k9
 };

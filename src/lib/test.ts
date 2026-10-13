@@ -2,15 +2,16 @@
 // Rozpracovaný test se drží v sessionStorage, aby přežil obnovení stránky (např. když iPhone
 // stránku na pozadí uvolní). Do trvalého pokroku se zapíše až dokončený test (progress.ts).
 import type { KapitolaId } from "../data/kapitoly";
-import type { Moznost, ObsahKapitoly, OtazkaVyber } from "../data/typy";
+import type { ObsahKapitoly, Otazka } from "../data/typy";
+import { jePlatnaOdpoved, type Odpoved } from "./odpovedi";
 import { zamichej } from "./shuffle";
 
 export const POCET_OTAZEK_TESTU = 10;
 export const HRANICE_USPECHU = 0.8;
 
-/** Otázky, ze kterých se test skládá. Typ „poradi“ přibude ve Fázi 3. */
-export function otazkyProTest(obsah: ObsahKapitoly): OtazkaVyber[] {
-  return obsah.otazky.filter((o): o is OtazkaVyber => o.typ === "vyber");
+/** Otázky, ze kterých se test skládá: oba typy, „vyber“ i „poradi“. */
+export function otazkyProTest(obsah: ObsahKapitoly): Otazka[] {
+  return obsah.otazky;
 }
 
 /** Kolik otázek bude test mít (10, nebo všechny, je-li jich méně). */
@@ -35,10 +36,10 @@ export function vyberOtazky(
   obsah: ObsahKapitoly,
   pocet: number = POCET_OTAZEK_TESTU,
   nahoda: () => number = Math.random
-): OtazkaVyber[] {
+): Otazka[] {
   const kandidati = otazkyProTest(obsah);
   const poradiPodtemat = new Map(obsah.podtemata.map((p, i) => [p.id, i]));
-  const serad = (seznam: OtazkaVyber[]) =>
+  const serad = (seznam: Otazka[]) =>
     [...seznam].sort((a, b) => (poradiPodtemat.get(a.podtema) ?? 0) - (poradiPodtemat.get(b.podtema) ?? 0));
 
   if (kandidati.length <= pocet) return serad(kandidati);
@@ -68,12 +69,11 @@ export function vyberOtazky(
 
 export interface RozpracovanyTest {
   ids: string[];
-  odpovedi: Partial<Record<string, Moznost["id"]>>;
+  odpovedi: Partial<Record<string, Odpoved>>;
   index: number;
 }
 
 const klic = (kapitola: KapitolaId) => `elektro7:test:${kapitola}`;
-const PISMENA: readonly string[] = ["a", "b", "c", "d"];
 
 export function nactiRozpracovany(kapitola: KapitolaId, obsah: ObsahKapitoly): RozpracovanyTest | undefined {
   try {
@@ -82,14 +82,15 @@ export function nactiRozpracovany(kapitola: KapitolaId, obsah: ObsahKapitoly): R
     const raw: unknown = JSON.parse(text);
     if (typeof raw !== "object" || raw === null) return undefined;
     const { ids, odpovedi, index } = raw as Record<string, unknown>;
-    const platne = new Set(otazkyProTest(obsah).map((o) => o.id));
+    const platne = new Map(otazkyProTest(obsah).map((o) => [o.id, o]));
     if (!Array.isArray(ids) || ids.length === 0 || !ids.every((id) => typeof id === "string" && platne.has(id))) {
       return undefined;
     }
-    const cisteOdpovedi: Partial<Record<string, Moznost["id"]>> = {};
+    const cisteOdpovedi: Partial<Record<string, Odpoved>> = {};
     if (typeof odpovedi === "object" && odpovedi !== null) {
       for (const [id, v] of Object.entries(odpovedi)) {
-        if (ids.includes(id) && typeof v === "string" && PISMENA.includes(v)) cisteOdpovedi[id] = v as Moznost["id"];
+        const otazka = platne.get(id);
+        if (otazka && ids.includes(id) && jePlatnaOdpoved(otazka, v)) cisteOdpovedi[id] = v;
       }
     }
     const i = typeof index === "number" && Number.isInteger(index) ? Math.min(Math.max(index, 0), ids.length - 1) : 0;
