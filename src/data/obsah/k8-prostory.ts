@@ -622,7 +622,7 @@ const obsah: ObsahKapitoly = {
           text: "Má pravdu, voda rozhoduje jen o krytí IP",
           spravna: false,
           vysvetleni:
-            "Ochranu před vodou sice vyjadřuje druhá číslice IP kódu, ale prostory s tryskající vodou a možností ponoření mohou zařízení zařadit i do I. třídy."
+            "Voda nerozhoduje jen o volbě zařízení. Prostory s tryskající vodou a možností ponoření zařízení zařadí do I. třídy, vyplývá-li to z dokumentace."
         },
         {
           id: "d",
@@ -633,7 +633,7 @@ const obsah: ObsahKapitoly = {
         }
       ],
       shrnuti: "I. třídu může určit i prostředí, například tryskající voda – ne jen počet osob v objektu.",
-      fakta: ["K8-03", "K2-04", "K8-05"]
+      fakta: ["K8-03", "K2-04"]
     },
     {
       id: "k8-q14",

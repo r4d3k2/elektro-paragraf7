@@ -379,7 +379,7 @@ const obsah: ObsahKapitoly = {
         }
       ],
       shrnuti: "TN-C-S: za proudovým chráničem nesmí být vodič PEN; v síti TN-C se chránič nepoužije vůbec.",
-      fakta: ["K6-06", "K7-01"]
+      fakta: ["K6-06"]
     },
 
     // ───────── Sítě TT a IT ─────────
