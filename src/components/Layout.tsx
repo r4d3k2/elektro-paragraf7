@@ -1,5 +1,6 @@
 // Společné rozvržení stránky: horní lišta (zpět, název, vzhled), obsah do 640 px.
 import { useEffect, type ReactNode } from "react";
+import { useOnline } from "../lib/pripojeni";
 import { pokrok, usePokrok } from "../lib/progress";
 import { dalsiVzhled, POPIS_VZHLEDU } from "../lib/vzhled";
 import { Icon, type NazevIkony } from "./Icon";
@@ -13,12 +14,16 @@ interface Props {
   children: ReactNode;
 }
 
+/** Id hlavního obsahu: na něj se přesune fokus po přechodu na jinou stránku (App.tsx). */
+export const ID_OBSAHU = "obsah";
+
 const IKONA_VZHLEDU: Record<string, NazevIkony> = { system: "system", svetly: "slunce", tmavy: "mesic" };
 
 export function Layout({ titulek, zpet, stitek, children }: Props) {
   const stav = usePokrok();
   const vzhled = stav.nastaveni.vzhled;
   const dalsi = dalsiVzhled(vzhled);
+  const online = useOnline();
 
   useEffect(() => {
     document.title = titulek ? `${titulek} · Elektro §7` : "Elektro §7 – trenažér";
@@ -26,6 +31,14 @@ export function Layout({ titulek, zpet, stitek, children }: Props) {
 
   return (
     <div className="flex min-h-dvh flex-col">
+      {/* Odkaz s „#“ by tu změnil trasu, proto tlačítko, které jen přesune fokus. */}
+      <button
+        type="button"
+        onClick={() => document.getElementById(ID_OBSAHU)?.focus()}
+        className="sr-only z-40 rounded-lg bg-primarni px-4 py-2 font-medium text-na-primarni focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      >
+        Přeskočit na obsah
+      </button>
       <header className="sticky top-0 z-20 border-b border-hrana bg-pozadi/90 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="mx-auto flex h-14 max-w-[640px] items-center gap-2 px-2">
           {zpet ? (
@@ -45,6 +58,15 @@ export function Layout({ titulek, zpet, stitek, children }: Props) {
             </a>
           )}
           <span className="min-w-0 flex-1 truncate text-center font-mono text-xs text-tlumeny">{stitek}</span>
+          {!online && (
+            <span
+              className="inline-flex items-center gap-1 rounded-md border border-overit/50 px-1.5 py-0.5 font-mono text-xs text-overit"
+              title="Zařízení je bez připojení. Aplikace funguje dál."
+            >
+              <Icon nazev="offline" size={14} />
+              offline
+            </span>
+          )}
           <button
             type="button"
             onClick={() => pokrok.nastavVzhled(dalsi)}
@@ -57,7 +79,9 @@ export function Layout({ titulek, zpet, stitek, children }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[640px] flex-1 px-4 pt-5 pb-28">{children}</main>
+      <main id={ID_OBSAHU} tabIndex={-1} className="mx-auto w-full max-w-[640px] flex-1 px-4 pt-5 pb-28 outline-none">
+        {children}
+      </main>
     </div>
   );
 }

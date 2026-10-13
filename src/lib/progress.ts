@@ -9,9 +9,11 @@ import {
   ulozisteFunguje,
   vychoziStav,
   type Ulozeno,
+  type VysledekCasti,
   type Vzhled,
   type ZaznamOtazky,
-  type ZaznamTestu
+  type ZaznamTestu,
+  type ZaznamZkousky
 } from "./storage";
 
 const nacteno = nacti();
@@ -91,6 +93,36 @@ export const pokrok = {
     });
   },
 
+  /**
+   * Uloží dokončenou zkoušku nanečisto jedním zápisem: výsledek s rozpadem po kapitolách
+   * do „zkousky“ a každou odpověď do statistiky otázek (chyby se pak objeví v Opakování chyb).
+   */
+  dokonciZkousku(
+    odpovedi: { idOtazky: string; kapitola: Kapitola["id"]; spravne: boolean }[],
+    neoverene: boolean
+  ): ZaznamZkousky | undefined {
+    if (odpovedi.length === 0) return undefined;
+    const kdy = new Date().toISOString();
+    const kapitoly: Record<string, VysledekCasti> = {};
+    for (const o of odpovedi) {
+      const k = kapitoly[o.kapitola] ?? { skore: 0, celkem: 0 };
+      kapitoly[o.kapitola] = { skore: k.skore + (o.spravne ? 1 : 0), celkem: k.celkem + 1 };
+    }
+    const zaznam: ZaznamZkousky = {
+      kdy,
+      skore: odpovedi.filter((o) => o.spravne).length,
+      celkem: odpovedi.length,
+      neoverene,
+      kapitoly
+    };
+    zmen((s) => {
+      const otazky = { ...s.otazky };
+      for (const o of odpovedi) otazky[o.idOtazky] = dalsiZaznam(otazky[o.idOtazky], o.spravne, kdy);
+      return { ...s, otazky, zkousky: [...s.zkousky, zaznam] };
+    });
+    return zaznam;
+  },
+
   oznacPrectene(idKarty: string): void {
     zmen((s) => (s.prectene.includes(idKarty) ? s : { ...s, prectene: [...s.prectene, idKarty] }));
   },
@@ -103,12 +135,22 @@ export const pokrok = {
     zmen((s) => (s.nastaveni.vzhled === vzhled ? s : { ...s, nastaveni: { ...s.nastaveni, vzhled } }));
   },
 
-  /** Smaže pokrok (odpovědi, přečtené karty, testy, poslední místo). Nastavení vzhledu zůstane. */
+  /** Smaže pokrok (odpovědi, přečtené karty, testy, zkoušky, poslední místo). Nastavení vzhledu zůstane. */
   smazPokrok(): void {
     const vzhled = stav.nastaveni.vzhled;
     smaz();
     lzeUlozit = true;
     zmen(() => ({ ...vychoziStav(), nastaveni: { vzhled } }));
+  },
+
+  /**
+   * Nahradí pokrok daty ze zálohy (už převedenými přes migrate). Nastavení vzhledu
+   * zůstane podle tohoto zařízení.
+   */
+  obnovZeZalohy(data: Ulozeno): void {
+    const vzhled = stav.nastaveni.vzhled;
+    lzeUlozit = true;
+    zmen(() => ({ ...data, nastaveni: { vzhled } }));
   }
 };
 
@@ -128,6 +170,15 @@ export function pocetChybnych(s: Ulozeno, idOtazek: string[]): number {
 
 export function pocetNovych(s: Ulozeno, idOtazek: string[]): number {
   return idOtazek.filter((id) => !s.otazky[id]).length;
+}
+
+/**
+ * Úspěšnost otázky: podíl správných ze všech pokusů (0–1). Nezodpovězená otázka má 0,5,
+ * stojí tedy mezi otázkami, které jdou hůř, a těmi, které jdou lépe.
+ */
+export function uspesnost(s: Ulozeno, idOtazky: string): number {
+  const z = s.otazky[idOtazky];
+  return z && z.pokusy > 0 ? z.spravne / z.pokusy : 0.5;
 }
 
 /** Nejlepší výsledek testu kapitoly jako podíl 0–1 (0, když test ještě neproběhl). */

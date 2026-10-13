@@ -102,6 +102,33 @@ const CESTY = {
       <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
       <path d="M16 9.5l5 5M21 9.5l-5 5" />
     </>
+  ),
+  zkouska: (
+    <>
+      <circle cx="12" cy="9" r="6" />
+      <path d="M8.6 13.9 7 22l5-3 5 3-1.6-8.1" />
+    </>
+  ),
+  chyby: (
+    <>
+      <circle cx="12" cy="12" r="9.5" />
+      <path d="M15 9l-6 6M9 9l6 6" />
+    </>
+  ),
+  prehled: <path d="M3 20h18M7 16v-5M12 16V6M17 16v-8" />,
+  stahnout: <path d="M12 3v12M7 10l5 5 5-5M4 20h16" />,
+  nahrat: <path d="M12 15V3M7 8l5-5 5 5M4 20h16" />,
+  sdilet: (
+    <>
+      <path d="M12 3v12M8 7l4-4 4 4" />
+      <path d="M8 11H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-2" />
+    </>
+  ),
+  offline: (
+    <>
+      <path d="M3 3l18 18" />
+      <path d="M17.5 18H7a5 5 0 0 1-1.7-9.7M9.9 5.4A6 6 0 0 1 18 10a4 4 0 0 1 3.4 5.4" />
+    </>
   )
 } satisfies Record<string, ReactNode>;
 

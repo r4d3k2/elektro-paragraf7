@@ -1,6 +1,6 @@
 # Elektro §7 – trenažér · specifikace
 
-> **Verze:** 1.0 · **Datum:** 2026-10-12 · **Repo:** `r4d3k2/elektro-paragraf7`
+> **Verze:** 1.1 · **Datum:** 2026-10-13 · **Repo:** `r4d3k2/elektro-paragraf7`
 > Zdroj pravdy pro funkce, datový model a fáze. Změny navrhuje Claude v chatu, verze se zvyšuje v hlavičce a v changelogu.
 
 ## 1. O projektu
@@ -143,22 +143,33 @@ Routing přes hash vlastním hookem `useHashRoute` (bez knihovny):
   - Tlačítko „Další“, ukazatel x / y, na konci souhrn (správně / špatně, seznam chybných s odkazy).
 - `#/k/:id/test` **Test kapitoly** (od Fáze 2): 10 otázek (nebo všechny, je-li jich méně), pokrývá všechna podtémata, seřazené podle podtémat. Zpětná vazba až na konci. Hranice úspěchu 80 %. Výsledek a rozbor s vysvětleními.
 - `#/zkouska`, `#/chyby`, `#/prehled` (Fáze 4).
-- `#/o-aplikaci`: účel, rozsah, upozornění, legenda stavů faktů, seznam `ZDROJE_ZNENI` s datem ověření, verze aplikace, reset pokroku (s potvrzením).
+- `#/o-aplikaci`: účel, rozsah, upozornění, legenda stavů faktů, seznam `ZDROJE_ZNENI` s datem ověření, offline režim, verze aplikace, reset pokroku (s potvrzením), záloha a obnova pokroku (od Fáze 4).
 
-**Pokrok** (localStorage, klíč `elektro7:v1`, vše v try/catch; bez úložiště aplikace funguje dál, jen si nic nepamatuje):
+**Pokrok** (localStorage, klíč `elektro7:v1`, vše v try/catch; bez úložiště aplikace funguje dál, jen si nic nepamatuje). Od Fáze 4 mají data verzi 2; klíč úložiště se nemění:
 
 ```ts
 interface Ulozeno {
-  verze: 1;
+  verze: 2;
   otazky: Record<string, { pokusy: number; spravne: number; posledni: "ok" | "chyba"; kdy: string }>;
   prectene: string[];
   testy: Record<string, { kdy: string; skore: number; celkem: number }[]>;
+  zkousky: {                       // historie zkoušek nanečisto (od verze 2)
+    kdy: string;
+    skore: number;
+    celkem: number;
+    neoverene: boolean;            // zahrnovala otázky opřené o fakta „overit“
+    kapitoly: Record<string, { skore: number; celkem: number }>; // výsledek po kapitolách
+  }[];
   posledniMisto?: string;
   nastaveni: { vzhled: "system" | "svetly" | "tmavy" };
 }
 ```
 
-Zvládnutí kapitoly = podíl jejích otázek, jejichž poslední odpověď je „ok“. Hvězdičky: jedna od 50 %, dvě od 80 %, tři při 100 % a zároveň testu kapitoly alespoň 80 % (test od Fáze 2). Funkce `migrate(raw)` připravená pro další verze.
+Zvládnutí kapitoly = podíl jejích otázek, jejichž poslední odpověď je „ok“. Hvězdičky: jedna od 50 %, dvě od 80 %, tři při 100 % a zároveň testu kapitoly alespoň 80 % (test od Fáze 2).
+
+Funkce `migrate(raw)` převede data verze 1 (Fáze 1–3) na verzi 2: všechny části zůstanou, přibude prázdné `zkousky`. Data novější verze, než aplikace zná, se nepřepisují. Rozpracovaná zkouška nanečisto je mimo `Ulozeno` pod klíčem `elektro7:zkouska`.
+
+**Záloha** (od Fáze 4): soubor JSON `{ aplikace: "elektro7-zaloha", vytvoreno, verzeAplikace, data: Ulozeno }`. Import přijme zálohu i holá data verze 1 a 2 (převede je přes `migrate`), novější verzi odmítne. Obnova po potvrzení nahradí pokrok na zařízení; nastavení vzhledu zůstane podle zařízení.
 
 ## 7. Interaktivní ilustrace (`src/ilustrace/`)
 
@@ -313,3 +324,4 @@ Akceptační kritéria Fáze 4:
 | Verze | Datum | Změna |
 | --- | --- | --- |
 | 1.0 | 2026-10-12 | Vznik specifikace: 9 kapitol, báze faktů, validátor, fáze F1–F4, cloudový workflow |
+| 1.1 | 2026-10-13 | Fáze 4: uložená data verze 2 (historie zkoušek nanečisto `zkousky`, migrace z verze 1), formát zálohy pokroku, rozpracovaná zkouška pod klíčem `elektro7:zkouska` |

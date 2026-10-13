@@ -2,18 +2,15 @@
 // seřazené podle podtémat. Zpětná vazba až na konci, hranice úspěchu 80 %. Výsledek se uloží do pokroku,
 // rozbor ukáže vysvětlení u všech možností. Rozpracovaný test přežije obnovení stránky (lib/test.ts).
 // Test obsahuje otázky obou typů: „vyber“ i „poradi“.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Kapitola } from "../data/kapitoly";
-import type { Moznost, ObsahKapitoly, Otazka, OtazkaPoradi, OtazkaVyber } from "../data/typy";
+import type { ObsahKapitoly, Otazka } from "../data/typy";
 import { Icon } from "../components/Icon";
 import { Layout } from "../components/Layout";
-import { OdznakOverit } from "../components/OdznakOverit";
-import { HlavickaOtazky } from "../components/OtazkaCasti";
-import { OtazkaView, PISMENA, useZobrazeneMoznosti } from "../components/OtazkaView";
-import { PoradiSeznam, useVychoziPoradi } from "../components/PoradiView";
-import { Pruh } from "../components/Pruh";
-import { nadpisSekce, plocha, tlacitkoPrimarni, tlacitkoSekundarni, tlacitkoTiche } from "../components/styly";
-import { maOverit, nejblizsiKarta } from "../lib/fakta";
+import { BehTestu, RadekVysledku, RozborTestu, VysledekSkore } from "../components/TestCasti";
+import { nadpisSekce, plocha, tlacitkoPrimarni, tlacitkoSekundarni } from "../components/styly";
+import { nejblizsiKarta } from "../lib/fakta";
+import { formatDatum, procenta } from "../lib/format";
 import { nazevPodtematu } from "../lib/obsah";
 import { jeSpravnaOdpoved, type Odpoved } from "../lib/odpovedi";
 import { pokrok, usePokrok } from "../lib/progress";
@@ -38,16 +35,6 @@ interface Props {
 interface Vysledek {
   otazky: Otazka[];
   odpovedi: Partial<Record<string, Odpoved>>;
-}
-
-function procenta(skore: number, celkem: number): number {
-  return celkem > 0 ? Math.round((skore / celkem) * 100) : 0;
-}
-
-function formatDatum(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return `${d.getDate()}. ${d.getMonth() + 1}. ${d.getFullYear()}`;
 }
 
 function otazkyTestu(obsah: ObsahKapitoly, ids: string[]): Otazka[] {
@@ -103,7 +90,15 @@ export function TestKapitoly({ kapitola, obsah }: Props) {
       {vysledek ? (
         <VysledekTestu kapitola={kapitola} obsah={obsah} vysledek={vysledek} onZnovu={zacni} />
       ) : beh ? (
-        <BehTestu obsah={obsah} test={beh} onZmena={zmen} onVyhodnot={vyhodnot} onZrus={zrus} />
+        <BehTestu
+          druh="test"
+          otazky={otazkyTestu(obsah, beh.ids)}
+          test={beh}
+          popisOtazky={(o) => nazevPodtematu(obsah, o.podtema)}
+          onZmena={zmen}
+          onVyhodnot={vyhodnot}
+          onZrus={zrus}
+        />
       ) : (
         <UvodTestu kapitola={kapitola} obsah={obsah} onStart={zacni} />
       )}
@@ -189,209 +184,6 @@ function UvodTestu({ kapitola, obsah, onStart }: { kapitola: Kapitola; obsah: Ob
   );
 }
 
-// ─── Běh testu: odpovědi bez zpětné vazby ───────────────────────────────
-
-interface BehProps {
-  obsah: ObsahKapitoly;
-  test: RozpracovanyTest;
-  onZmena: (test: RozpracovanyTest) => void;
-  onVyhodnot: (test: RozpracovanyTest) => void;
-  onZrus: () => void;
-}
-
-function BehTestu({ obsah, test, onZmena, onVyhodnot, onZrus }: BehProps) {
-  const [potvrditZruseni, setPotvrditZruseni] = useState(false);
-  const otazky = useMemo(() => otazkyTestu(obsah, test.ids), [obsah, test.ids]);
-  const otazka = otazky[test.index];
-  if (!otazka) return null;
-
-  const zvoleno = test.odpovedi[otazka.id];
-  const posledni = test.index === otazky.length - 1;
-  const zodpovezeno = otazky.filter((o) => test.odpovedi[o.id] !== undefined).length;
-  const chybiJinde = otazky.some((o, i) => i !== test.index && test.odpovedi[o.id] === undefined);
-
-  function jdiNa(index: number) {
-    onZmena({ ...test, index });
-    window.scrollTo({ top: 0 });
-  }
-
-  return (
-    <div>
-      <div className="flex items-center gap-3">
-        <Pruh hodnota={test.index + 1} max={otazky.length} popis={`Otázka ${test.index + 1} z ${otazky.length}`} />
-        <span className="shrink-0 font-mono text-sm text-tlumeny">
-          {test.index + 1} / {otazky.length}
-        </span>
-      </div>
-
-      <div className="mt-4">
-        {otazka.typ === "poradi" ? (
-          <TestOtazkaPoradi
-            key={otazka.id}
-            otazka={otazka}
-            nazevPodtematu={nazevPodtematu(obsah, otazka.podtema)}
-            zvoleno={Array.isArray(zvoleno) ? zvoleno : undefined}
-            onZvol={(poradi) => onZmena({ ...test, odpovedi: { ...test.odpovedi, [otazka.id]: poradi } })}
-          />
-        ) : (
-          <TestOtazka
-            key={otazka.id}
-            otazka={otazka}
-            nazevPodtematu={nazevPodtematu(obsah, otazka.podtema)}
-            zvoleno={typeof zvoleno === "string" ? zvoleno : undefined}
-            onZvol={(id) => onZmena({ ...test, odpovedi: { ...test.odpovedi, [otazka.id]: id } })}
-          />
-        )}
-      </div>
-
-      <div className="mt-8 border-t border-hrana pt-4">
-        {!potvrditZruseni ? (
-          <button type="button" onClick={() => setPotvrditZruseni(true)} className={tlacitkoTiche}>
-            Zrušit test bez vyhodnocení
-          </button>
-        ) : (
-          <div className="rounded-xl border-2 border-spatne/60 p-4" role="alertdialog" aria-labelledby="zrusit-test">
-            <p id="zrusit-test" className="font-semibold">
-              Zrušit rozpracovaný test?
-            </p>
-            <p className="mt-1 text-sm text-tlumeny">Odpovědi se zahodí a výsledek se neuloží.</p>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={onZrus}
-                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-spatne px-4 font-medium text-plocha"
-              >
-                Zrušit test
-              </button>
-              <button type="button" onClick={() => setPotvrditZruseni(false)} className={tlacitkoSekundarni}>
-                Pokračovat
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-hrana bg-pozadi/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-        <div className="mx-auto flex max-w-[640px] items-center gap-3 px-4 py-3">
-          <button
-            type="button"
-            onClick={() => jdiNa(test.index - 1)}
-            disabled={test.index === 0}
-            className={tlacitkoSekundarni}
-            aria-label="Předchozí otázka"
-          >
-            <Icon nazev="sipkaVlevo" size={18} />
-          </button>
-          {posledni ? (
-            <button
-              type="button"
-              onClick={() => onVyhodnot(test)}
-              disabled={zodpovezeno < otazky.length}
-              className={`${tlacitkoPrimarni} flex-1`}
-            >
-              Vyhodnotit test
-              <Icon nazev="spravne" size={18} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => jdiNa(test.index + 1)}
-              disabled={zvoleno === undefined}
-              className={`${tlacitkoPrimarni} flex-1`}
-            >
-              Další
-              <Icon nazev="sipkaVpravo" size={18} />
-            </button>
-          )}
-        </div>
-        {posledni && chybiJinde && (
-          <p className="mx-auto max-w-[640px] px-4 pb-2 text-center text-xs text-tlumeny">
-            Zodpovězeno {zodpovezeno} z {otazky.length}. Vraťte se k otázkám bez odpovědi.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-interface TestOtazkaProps {
-  otazka: OtazkaVyber;
-  nazevPodtematu: string;
-  zvoleno: Moznost["id"] | undefined;
-  onZvol: (id: Moznost["id"]) => void;
-}
-
-/** Otázka v testu: volbu lze měnit až do vyhodnocení, správnost se neukazuje. */
-function TestOtazka({ otazka, nazevPodtematu, zvoleno, onZvol }: TestOtazkaProps) {
-  const zobrazene = useZobrazeneMoznosti(otazka);
-  return (
-    <article aria-labelledby={`zadani-${otazka.id}`}>
-      <HlavickaOtazky otazka={otazka} nazevPodtematu={nazevPodtematu} />
-      <ul className="mt-4 space-y-2.5">
-        {zobrazene.map((m, i) => {
-          const zvolena = m.id === zvoleno;
-          return (
-            <li key={m.id}>
-              <button
-                type="button"
-                onClick={() => onZvol(m.id)}
-                aria-pressed={zvolena}
-                className={`flex min-h-12 w-full items-start gap-3 rounded-xl border-2 p-3 text-left transition-colors duration-150 ${
-                  zvolena ? "border-primarni bg-primarni/10" : "border-hrana bg-plocha hover:border-primarni active:bg-plocha-2"
-                }`}
-              >
-                <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md font-mono text-sm font-semibold ${
-                    zvolena ? "bg-primarni text-na-primarni" : "bg-plocha-2 text-text"
-                  }`}
-                  aria-hidden="true"
-                >
-                  {PISMENA[i]}
-                </span>
-                <span className="min-w-0 flex-1 pt-0.5">{m.text}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-3 text-sm text-tlumeny">Odpověď můžete změnit až do vyhodnocení testu.</p>
-    </article>
-  );
-}
-
-interface TestOtazkaPoradiProps {
-  otazka: OtazkaPoradi;
-  nazevPodtematu: string;
-  zvoleno: string[] | undefined;
-  onZvol: (poradi: string[]) => void;
-}
-
-/**
- * Otázka na seřazení v testu: každý přesun se hned uloží jako odpověď. Pořadí lze přijmout i beze změny
- * tlačítkem „Potvrdit toto pořadí“. Správnost se neukazuje.
- */
-function TestOtazkaPoradi({ otazka, nazevPodtematu, zvoleno, onZvol }: TestOtazkaPoradiProps) {
-  const vychozi = useVychoziPoradi(otazka);
-  const poradi = zvoleno ?? vychozi;
-  return (
-    <article aria-labelledby={`zadani-${otazka.id}`}>
-      <HlavickaOtazky otazka={otazka} nazevPodtematu={nazevPodtematu} />
-      <p className="mt-2 text-sm text-tlumeny">Seřaďte položky šipkami od první po poslední.</p>
-      <div className="mt-4">
-        <PoradiSeznam otazka={otazka} poradi={poradi} onZmena={onZvol} />
-      </div>
-      {zvoleno === undefined ? (
-        <button type="button" onClick={() => onZvol(poradi)} className={`${tlacitkoSekundarni} mt-4 w-full`}>
-          <Icon nazev="spravne" size={18} />
-          Potvrdit toto pořadí
-        </button>
-      ) : (
-        <p className="mt-3 text-sm text-tlumeny">Pořadí je uložené. Měnit ho můžete až do vyhodnocení testu.</p>
-      )}
-    </article>
-  );
-}
-
 // ─── Výsledek a rozbor ──────────────────────────────────────────────────
 
 interface VysledekProps {
@@ -428,38 +220,14 @@ function VysledekTestu({ kapitola, obsah, vysledek, onZnovu }: VysledekProps) {
         Výsledek testu
       </h1>
 
-      <div
-        className={`mt-4 rounded-xl border-2 p-4 ${ok ? "border-spravne bg-spravne/10 text-spravne" : "border-spatne bg-spatne/10 text-spatne"}`}
-        role="status"
-      >
-        <p className="flex items-center gap-2 text-lg font-semibold">
-          <Icon nazev={ok ? "spravne" : "spatne"} size={24} />
-          {ok ? "Úspěch" : "Neúspěch"}
-        </p>
-        <p className="mt-1 font-mono text-4xl font-semibold">
-          {skore} / {celkem} <span className="text-2xl">· {procenta(skore, celkem)} %</span>
-        </p>
-        <p className="mt-1 text-sm text-text">
-          {ok
-            ? "Hranice 80 % je splněná. Výsledek je uložený."
-            : `Pro úspěch je potřeba alespoň ${minimumProUspech(celkem)} z ${celkem} (80 %). Výsledek je uložený.`}
-        </p>
-      </div>
+      <VysledekSkore skore={skore} celkem={celkem} ok={ok} />
 
       <section className="mt-6">
         <h2 className={nadpisSekce}>Podle podtémat</h2>
         <ul className="mt-2 space-y-2">
           {poPodtematech.map((p) => (
             <li key={p.id} className={`${plocha} p-3`}>
-              <div className="flex items-start justify-between gap-3">
-                <span className="text-sm">{p.nazev}</span>
-                <span className="shrink-0 font-mono text-sm font-semibold">
-                  {p.spravne} / {p.celkem}
-                </span>
-              </div>
-              <div className="mt-2">
-                <Pruh hodnota={p.spravne} max={p.celkem} barva="spravne" popis={`${p.nazev}: správně ${p.spravne} z ${p.celkem}`} />
-              </div>
+              <RadekVysledku nazev={p.nazev} skore={p.spravne} celkem={p.celkem} />
             </li>
           ))}
         </ul>
@@ -481,59 +249,15 @@ function VysledekTestu({ kapitola, obsah, vysledek, onZnovu }: VysledekProps) {
         </a>
       </div>
 
-      <section className="mt-8" aria-labelledby="rozbor-nadpis">
-        <h2 id="rozbor-nadpis" className="text-xl font-bold">
-          Rozbor
-        </h2>
-        <p className="mt-1 text-sm text-tlumeny">
-          Chybné odpovědi jsou rozbalené. Klepnutím rozbalíte i ostatní.
-        </p>
-        <ol className="mt-3 space-y-3">
-          {otazky.map((o, i) => {
-            const spravne = jeSpravnaOdpoved(o, odpovedi[o.id]);
-            const karta = nejblizsiKarta(obsah.lekce, o);
-            return (
-              <li key={o.id}>
-                <details
-                  open={!spravne}
-                  className={`group rounded-xl border-2 bg-plocha ${spravne ? "border-hrana" : "border-spatne/60"}`}
-                >
-                  <summary className="flex min-h-12 cursor-pointer list-none items-start gap-3 p-3 [&::-webkit-details-marker]:hidden">
-                    <span className="font-mono text-sm text-tlumeny">{i + 1}.</span>
-                    <Icon
-                      nazev={spravne ? "spravne" : "spatne"}
-                      size={20}
-                      className={`mt-0.5 shrink-0 ${spravne ? "text-spravne" : "text-spatne"}`}
-                      title={spravne ? "Správně" : "Špatně"}
-                    />
-                    <span className="min-w-0 flex-1 text-sm">
-                      <span className="line-clamp-2">{o.zadani}</span>
-                      {maOverit(o.fakta) && (
-                        <span className="mt-1 block">
-                          <OdznakOverit />
-                        </span>
-                      )}
-                    </span>
-                    <Icon
-                      nazev="vpred"
-                      size={18}
-                      className="mt-0.5 shrink-0 text-tlumeny transition-transform duration-150 group-open:rotate-90"
-                    />
-                  </summary>
-                  <div className="border-t border-hrana p-3">
-                    <OtazkaView
-                      otazka={o}
-                      nazevPodtematu={nazevPodtematu(obsah, o.podtema)}
-                      odkazNauka={karta ? `#${zaklad}/nauka/${karta.poradi}` : undefined}
-                      odpovedPredem={odpovedi[o.id]}
-                    />
-                  </div>
-                </details>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
+      <RozborTestu
+        otazky={otazky}
+        odpovedi={odpovedi}
+        popisOtazky={(o) => nazevPodtematu(obsah, o.podtema)}
+        odkazNauka={(o) => {
+          const karta = nejblizsiKarta(obsah.lekce, o);
+          return karta ? `#${zaklad}/nauka/${karta.poradi}` : undefined;
+        }}
+      />
     </section>
   );
 }
