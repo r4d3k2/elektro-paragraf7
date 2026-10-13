@@ -17,6 +17,15 @@ function formatDatum(iso: string): string {
   return rok && mesic && den ? `${den}. ${mesic}. ${rok}` : iso;
 }
 
+/** „1–5“ pro souvislou řadu, jinak „1, 2 a 4“. */
+function vycetKapitol(cisla: number[]): string {
+  if (cisla.length === 0) return "";
+  const souvisla = cisla.every((c, i) => i === 0 || c === cisla[i - 1] + 1);
+  if (cisla.length > 2 && souvisla) return `${cisla[0]}–${cisla[cisla.length - 1]}`;
+  if (cisla.length === 1) return String(cisla[0]);
+  return `${cisla.slice(0, -1).join(", ")} a ${cisla[cisla.length - 1]}`;
+}
+
 function Sekce({ nadpis, children }: { nadpis: string; children: ReactNode }) {
   return (
     <section className="mt-7">
@@ -32,6 +41,7 @@ export function OAplikaci() {
   const [smazano, setSmazano] = useState(false);
   const aktivni = KAPITOLY.filter(jeAktivni).map((k) => k.cislo);
   const zodpovezeno = Object.keys(stav.otazky).length;
+  const testu = Object.values(stav.testy).reduce((soucet, seznam) => soucet + seznam.length, 0);
 
   return (
     <Layout titulek="O aplikaci" zpet={{ href: "#/", popis: "Domů" }} stitek="O aplikaci">
@@ -59,7 +69,7 @@ export function OAplikaci() {
       <Sekce nadpis="Rozsah">
         <p>
           Napětí do 1 kV AC / 1,5 kV DC, objekty bez nebezpečí výbuchu. Látka je v 9 kapitolách v pevném pořadí.
-          Teď jsou zpřístupněné kapitoly {aktivni.join(" a ")} (fáze {AKTUALNI_FAZE}), další přibudou.
+          Teď jsou zpřístupněné kapitoly {vycetKapitol(aktivni)} (fáze {AKTUALNI_FAZE}), další přibudou.
         </p>
       </Sekce>
 
@@ -126,7 +136,8 @@ export function OAplikaci() {
       <Sekce nadpis="Pokrok">
         <p className="text-sm">
           Zodpovězené otázky: <span className="font-mono">{zodpovezeno}</span> · přečtené karty:{" "}
-          <span className="font-mono">{stav.prectene.length}</span>
+          <span className="font-mono">{stav.prectene.length}</span> · testy kapitol:{" "}
+          <span className="font-mono">{testu}</span>
         </p>
         <p className="mt-1 text-sm text-tlumeny">
           {ukladaniDostupne
@@ -144,7 +155,8 @@ export function OAplikaci() {
               Opravdu smazat veškerý pokrok?
             </p>
             <p className="mt-1 text-sm text-tlumeny">
-              Smažou se odpovědi, přečtené karty a poslední místo. Nastavení vzhledu zůstane. Akci nelze vrátit.
+              Smažou se odpovědi, přečtené karty, výsledky testů a poslední místo. Nastavení vzhledu zůstane. Akci
+              nelze vrátit.
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <button
