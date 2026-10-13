@@ -80,6 +80,15 @@
   --color-spatne: var(--c-spatne);
   --color-overit: var(--c-overit);
 
+  /* vodiče v ilustracích (třídy stroke-vodic-…, fill-vodic-…) */
+  --color-vodic-hneda: var(--c-vodic-hneda);
+  --color-vodic-cerna: var(--c-vodic-cerna);
+  --color-vodic-cerna-obrys: var(--c-vodic-cerna-obrys);
+  --color-vodic-seda: var(--c-vodic-seda);
+  --color-vodic-modra: var(--c-vodic-modra);
+  --color-vodic-zelena: var(--c-vodic-zelena);
+  --color-vodic-zluta: var(--c-vodic-zluta);
+
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
