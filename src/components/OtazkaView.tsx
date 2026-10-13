@@ -1,4 +1,5 @@
 // Otázka typu „vyber“ se zpětnou vazbou podle sekce 6 specifikace.
+// S odpovedPredem se zobrazí rovnou vyhodnocená (rozbor testu kapitoly).
 import { useMemo, useRef, useState } from "react";
 import type { Moznost, OtazkaVyber } from "../data/typy";
 import { maOverit } from "../lib/fakta";
@@ -8,23 +9,16 @@ import { Icon } from "./Icon";
 import { OdznakOverit } from "./OdznakOverit";
 import { nadpisSekce } from "./styly";
 
-const PISMENA = ["A", "B", "C", "D"];
-const POPIS_OBTIZNOSTI: Record<1 | 2 | 3, string> = {
+export const PISMENA = ["A", "B", "C", "D"];
+export const POPIS_OBTIZNOSTI: Record<1 | 2 | 3, string> = {
   1: "Pojem",
   2: "Souvislosti",
   3: "Situace z praxe"
 };
 
-interface Props {
-  otazka: OtazkaVyber;
-  nazevPodtematu?: string;
-  /** Odkaz na kartu nauky, která s otázkou sdílí nejvíc faktů. */
-  odkazNauka?: string;
-  onOdpoved: (spravne: boolean) => void;
-}
-
-export function OtazkaView({ otazka, nazevPodtematu, odkazNauka, onOdpoved }: Props) {
-  const zobrazene = useMemo(() => {
+/** Možnosti v zamíchaném pořadí, které zůstává stejné po celou relaci (Fisher–Yates, shuffle.ts). */
+export function useZobrazeneMoznosti(otazka: OtazkaVyber): Moznost[] {
+  return useMemo(() => {
     const poradi = poradiMoznosti(
       otazka.id,
       otazka.moznosti.map((m) => m.id)
@@ -33,8 +27,21 @@ export function OtazkaView({ otazka, nazevPodtematu, odkazNauka, onOdpoved }: Pr
       .map((id) => otazka.moznosti.find((m) => m.id === id))
       .filter((m): m is Moznost => m !== undefined);
   }, [otazka]);
+}
 
-  const [zvoleno, setZvoleno] = useState<Moznost["id"] | null>(null);
+interface Props {
+  otazka: OtazkaVyber;
+  nazevPodtematu?: string;
+  /** Odkaz na kartu nauky, která s otázkou sdílí nejvíc faktů. */
+  odkazNauka?: string;
+  onOdpoved?: (spravne: boolean) => void;
+  /** Už zvolená odpověď – otázka se zobrazí vyhodnocená a zamčená. */
+  odpovedPredem?: Moznost["id"];
+}
+
+export function OtazkaView({ otazka, nazevPodtematu, odkazNauka, onOdpoved, odpovedPredem }: Props) {
+  const zobrazene = useZobrazeneMoznosti(otazka);
+  const [zvoleno, setZvoleno] = useState<Moznost["id"] | null>(odpovedPredem ?? null);
   const vysledek = useRef<HTMLDivElement>(null);
   const spravna = otazka.moznosti.find((m) => m.spravna);
   const odpovezeno = zvoleno !== null;
@@ -44,7 +51,7 @@ export function OtazkaView({ otazka, nazevPodtematu, odkazNauka, onOdpoved }: Pr
   function zvol(id: Moznost["id"]) {
     if (zvoleno !== null) return;
     setZvoleno(id);
-    onOdpoved(id === spravna?.id);
+    onOdpoved?.(id === spravna?.id);
     // Výsledek se objeví hned pod možnostmi; posuneme ho do zorného pole jen tolik, kolik je potřeba.
     requestAnimationFrame(() => {
       const omezitPohyb = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

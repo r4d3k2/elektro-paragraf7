@@ -12,6 +12,7 @@ import { Kapitola } from "./pages/Kapitola";
 import { Nauka } from "./pages/Nauka";
 import { OAplikaci } from "./pages/OAplikaci";
 import { Procvicovani } from "./pages/Procvicovani";
+import { TestKapitoly } from "./pages/TestKapitoly";
 
 function Nenalezeno() {
   return (
@@ -37,7 +38,10 @@ function Stranka({ trasa }: { trasa: Trasa }) {
     const obsah = obsahKapitoly(kapitola);
     if (!obsah) return <Kapitola kapitola={kapitola} />;
     if (sekce === "nauka") return <Nauka kapitola={kapitola} obsah={obsah} poradi={parametr} />;
-    if (sekce === "procvic" && !parametr) return <Procvicovani kapitola={kapitola} obsah={obsah} dotaz={trasa.dotaz} />;
+    // key: při přechodu rovnou do jiné kapitoly se stav relace nesmí přenést.
+    if (sekce === "procvic" && !parametr)
+      return <Procvicovani key={kapitola.id} kapitola={kapitola} obsah={obsah} dotaz={trasa.dotaz} />;
+    if (sekce === "test" && !parametr) return <TestKapitoly key={kapitola.id} kapitola={kapitola} obsah={obsah} />;
   }
   return <Nenalezeno />;
 }

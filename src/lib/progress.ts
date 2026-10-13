@@ -9,7 +9,9 @@ import {
   ulozisteFunguje,
   vychoziStav,
   type Ulozeno,
-  type Vzhled
+  type Vzhled,
+  type ZaznamOtazky,
+  type ZaznamTestu
 } from "./storage";
 
 const nacteno = nacti();
@@ -57,22 +59,35 @@ export function aktualniPokrok(): Ulozeno {
   return stav;
 }
 
+function dalsiZaznam(puvodni: ZaznamOtazky | undefined, spravne: boolean, kdy: string): ZaznamOtazky {
+  return {
+    pokusy: (puvodni?.pokusy ?? 0) + 1,
+    spravne: (puvodni?.spravne ?? 0) + (spravne ? 1 : 0),
+    posledni: spravne ? "ok" : "chyba",
+    kdy
+  };
+}
+
 export const pokrok = {
   zaznamenejOdpoved(idOtazky: string, spravne: boolean): void {
+    zmen((s) => ({
+      ...s,
+      otazky: { ...s.otazky, [idOtazky]: dalsiZaznam(s.otazky[idOtazky], spravne, new Date().toISOString()) }
+    }));
+  },
+
+  /**
+   * Uloží dokončený test kapitoly jedním zápisem: výsledek do „testy“ a každou odpověď
+   * do statistiky otázek (chyby z testu se pak objeví v režimu Chyby).
+   */
+  dokonciTest(kapitola: Kapitola["id"], odpovedi: { idOtazky: string; spravne: boolean }[]): void {
+    if (odpovedi.length === 0) return;
+    const kdy = new Date().toISOString();
     zmen((s) => {
-      const puvodni = s.otazky[idOtazky];
-      return {
-        ...s,
-        otazky: {
-          ...s.otazky,
-          [idOtazky]: {
-            pokusy: (puvodni?.pokusy ?? 0) + 1,
-            spravne: (puvodni?.spravne ?? 0) + (spravne ? 1 : 0),
-            posledni: spravne ? "ok" : "chyba",
-            kdy: new Date().toISOString()
-          }
-        }
-      };
+      const otazky = { ...s.otazky };
+      for (const o of odpovedi) otazky[o.idOtazky] = dalsiZaznam(otazky[o.idOtazky], o.spravne, kdy);
+      const zaznam: ZaznamTestu = { kdy, skore: odpovedi.filter((o) => o.spravne).length, celkem: odpovedi.length };
+      return { ...s, otazky, testy: { ...s.testy, [kapitola]: [...(s.testy[kapitola] ?? []), zaznam] } };
     });
   },
 
@@ -115,7 +130,7 @@ export function pocetNovych(s: Ulozeno, idOtazek: string[]): number {
   return idOtazek.filter((id) => !s.otazky[id]).length;
 }
 
-/** Nejlepší výsledek testu kapitoly jako podíl 0–1 (testy přibudou ve Fázi 2). */
+/** Nejlepší výsledek testu kapitoly jako podíl 0–1 (0, když test ještě neproběhl). */
 export function nejlepsiTest(s: Ulozeno, kapitola: Kapitola["id"]): number {
   const testy = s.testy[kapitola] ?? [];
   return testy.reduce((max, t) => (t.celkem > 0 ? Math.max(max, t.skore / t.celkem) : max), 0);

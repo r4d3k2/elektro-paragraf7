@@ -6,7 +6,13 @@
 
 ## Stav
 
-Hotová je **Fáze 1**: kostra projektu, validátor obsahu, kapitoly 1 (Legislativa a odborná způsobilost) a 2 (Vyhrazená elektrická zařízení a revize), obrazovky Domů, Kapitola, Nauka, Procvičování a O aplikaci a interaktivní ilustrace žebříčku způsobilosti, lhůt revizí a kódu oprávnění. Další fáze popisuje specifikace.
+Hotové jsou **Fáze 1 a 2**:
+
+- kapitoly 1–5: Legislativa a odborná způsobilost; Vyhrazená elektrická zařízení a revize; Organizace práce a odpovědnosti; Bezpečná práce na elektrických zařízeních; Účinky proudu a první pomoc,
+- obrazovky Domů, Kapitola, Nauka, Procvičování, Test kapitoly (10 otázek ze všech podtémat, hranice 80 %, rozbor s vysvětleními) a O aplikaci,
+- interaktivní ilustrace: žebříček způsobilosti, lhůty revizí, kód oprávnění, pokyny – dohled – dozor, pět pravidel práce bez napětí, pásma kolem živé části a metronom pro resuscitaci.
+
+Kapitoly 6–9, otázky na seřazení, zkouška nanečisto a offline režim přijdou v dalších fázích podle specifikace.
 
 ## Příkazy
 

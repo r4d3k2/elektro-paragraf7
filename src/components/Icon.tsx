@@ -84,6 +84,22 @@ const CESTY = {
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <path d="M3 15l5-5 4 4 3-3 6 6" />
     </>
+  ),
+  start: <polygon points="7 4.5 19.5 12 7 19.5" fill="currentColor" />,
+  stop: <rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
+  zvuk: (
+    <>
+      <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+      <path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11" />
+    </>
+  ),
+  ticho: (
+    <>
+      <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+      <path d="M16 9.5l5 5M21 9.5l-5 5" />
+    </>
   )
 } satisfies Record<string, ReactNode>;
 
