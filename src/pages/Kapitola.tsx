@@ -1,4 +1,4 @@
-// #/k/:id – přehled kapitoly: cíle, předpisy, Nauka, Procvičování, Test (od Fáze 2), podtémata.
+// #/k/:id – přehled kapitoly: cíle, předpisy, Nauka, Procvičování, Test kapitoly, podtémata.
 import type { Kapitola as KapitolaTyp } from "../data/kapitoly";
 import { Hvezdicky } from "../components/Hvezdicky";
 import { Icon, type NazevIkony } from "../components/Icon";
@@ -9,6 +9,7 @@ import { nadpisSekce, plocha } from "../components/styly";
 import { obsahKapitoly } from "../lib/obsah";
 import { hvezdicky, nejlepsiTest, pocetPrectenych, pocetZvladnutych, usePokrok } from "../lib/progress";
 import { odkaz } from "../lib/route";
+import { delkaTestu } from "../lib/test";
 
 interface DlazdiceProps {
   ikona: NazevIkony;
@@ -107,7 +108,9 @@ export function Kapitola({ kapitola }: { kapitola: KapitolaTyp }) {
   const precteno = pocetPrectenych(stav, idKaret);
   const zvladnuto = pocetZvladnutych(stav, idOtazek);
   const prvniNeprectena = obsah.lekce.findIndex((l) => !stav.prectene.includes(l.id));
-  const hvezdy = hvezdicky(idOtazek.length ? zvladnuto / idOtazek.length : 0, nejlepsiTest(stav, kapitola.id));
+  const nejlepsi = nejlepsiTest(stav, kapitola.id);
+  const pokusu = stav.testy[kapitola.id]?.length ?? 0;
+  const hvezdy = hvezdicky(idOtazek.length ? zvladnuto / idOtazek.length : 0, nejlepsi);
   const zaklad = `/k/${kapitola.id}`;
 
   return (
@@ -131,7 +134,14 @@ export function Kapitola({ kapitola }: { kapitola: KapitolaTyp }) {
           hodnota={zvladnuto}
           max={idOtazek.length}
         />
-        <Dlazdice ikona="test" nazev="Test kapitoly" popis="od Fáze 2" />
+        <Dlazdice
+          ikona="test"
+          nazev="Test kapitoly"
+          popis={pokusu > 0 ? `Nejlepší ${Math.round(nejlepsi * 100)} %` : `${delkaTestu(obsah)} otázek · 80 %`}
+          href={`#${zaklad}/test`}
+          hodnota={pokusu > 0 ? Math.round(nejlepsi * 100) : undefined}
+          max={100}
+        />
       </div>
 
       <div className="mt-4 flex items-center gap-2 text-sm text-tlumeny">

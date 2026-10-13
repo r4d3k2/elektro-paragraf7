@@ -37,6 +37,9 @@ export function popisMista(hash: string): { nadpis: string; popis: string } | un
     if (!karta) return undefined;
     return { nadpis, popis: `Nauka ${poradi} / ${obsah.lekce.length}: ${karta.nadpis}` };
   }
+  if (cesta[2] === "test") {
+    return { nadpis, popis: "Test kapitoly" };
+  }
   if (cesta[2] === "procvic") {
     const podtema = dotaz.get("podtema");
     return {
