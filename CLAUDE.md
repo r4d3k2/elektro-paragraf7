@@ -6,12 +6,12 @@ Osobní webová aplikace (PWA pro iPhone i PC) na přípravu ke zkoušce **vedou
 Zdroj pravdy pro funkce, data a fáze: `docs/elektro-par7-spec.md`.
 
 ## Workflow
-- Vývoj běží v cloudovém Claude Code (claude.ai/code). Každé sezení pracuje v jedné své větvi, nezakládá další větve ani worktree a nikdy neslučuje do `main`. Pull request vytváří a slučuje Radovan. Vercel nasazuje produkci z `main`, pull requesty mají preview URL.
-- Každá fáze končí zastavením a shrnutím (co je hotové, počty, otázky opřené o fakta „overit“, chybějící fakta, co otestovat na iPhonu).
-- Commity česky: `F2: …`, `obsah: …`, `oprava: …`.
+- Od Fáze 3 probíhá vývoj lokálně v Claude Code Desktop na PC (Fáze 1 a 2 proběhly v cloudovém Claude Code). Každá fáze má vlastní větev; sezení v ní pracuje, nezakládá další větve ani worktree, nikdy necommituje, nepushuje ani neslučuje do `main` a na konci větev pushne. Pull request i merge dělá Radovan na GitHubu po testu preview na Vercelu. Vercel nasazuje produkci z `main`, pull requesty mají preview URL.
+- Každá fáze končí zastavením a shrnutím (co je hotové, počty, otázky opřené o fakta „overit“, chybějící fakta, co otestovat na iPhonu, název pushnuté větve).
+- Commity česky: `F3: …`, `obsah: …`, `oprava: …`.
 - Před každým commitem `npm run build` (prebuild spouští validátor obsahu). Build musí projít.
 - Neprohledávej přihlašovací údaje ani tokeny. Když selže `git push`, vypiš přesnou chybu.
-- Dev server ani náhled v prohlížeči v cloudu nespouštěj; kontrolou je build, validátor a typy.
+- `npm run dev` sám nespouštěj; náhled spravuje Preview v Claude Code Desktop. Kontrolou je build, validátor a typy.
 
 ## Tech stack
 React + TypeScript (strict) + Vite + Tailwind CSS v4 (`@tailwindcss/vite`), skripty přes `tsx`. Žádné další knihovny; jedinou výjimkou je ve Fázi 4 `vite-plugin-pwa`. Perzistence přes `src/lib/storage.ts` (localStorage v try/catch, klíč `elektro7:v1`, migrační funkce). Ikony jako inline SVG v `src/components/Icon.tsx`.
