@@ -132,6 +132,7 @@ interface Statistika {
   kapitola: string;
   karty: number;
   otazky: number;
+  poradi: number;
   obtiznost: [number, number, number];
   kartyOverit: number;
   otazkyOverit: number;
@@ -202,6 +203,7 @@ for (const [klic, obsah] of obsahy) {
   const obtiznost: [number, number, number] = [0, 0, 0];
   const spravnaPismena: Record<string, number> = { a: 0, b: 0, c: 0, d: 0 };
   let otazekVyber = 0;
+  let otazekPoradi = 0;
   let otazkyOverit = 0;
 
   for (const otazka of obsah.otazky) {
@@ -284,6 +286,7 @@ for (const [klic, obsah] of obsahy) {
         }
       });
     } else if (otazka.typ === "poradi") {
+      otazekPoradi++;
       const polozky = otazka.polozky;
       if (polozky.length < 4 || polozky.length > 7) {
         chyba(soubor, id, "5 pořadí", `má ${tvar(polozky.length, "položku", "položky", "položek")}, povoleno je 4–7`);
@@ -292,6 +295,16 @@ for (const [klic, obsah] of obsahy) {
       const mnozina = new Set(idPolozek);
       if (mnozina.size !== idPolozek.length) {
         chyba(soubor, id, "5 pořadí", "id položek se opakují");
+      }
+      if (idPolozek.some((p) => prazdny(p))) {
+        chyba(soubor, id, "5 pořadí", "některá položka má prázdné id");
+      }
+      const textyPolozek = polozky.map((p) => normalizuj(p.text));
+      if (new Set(textyPolozek).size !== textyPolozek.length) {
+        chyba(soubor, id, "5 pořadí", "texty položek se v otázce opakují");
+      }
+      if ((otazka.vysvetleniPoradi ?? "").trim().length < MIN_DELKA_VYSVETLENI) {
+        chyba(soubor, id, "5 pořadí", `vysvetleniPoradi má méně než ${MIN_DELKA_VYSVETLENI} znaků`);
       }
       const permutace =
         otazka.spravnePoradi.length === idPolozek.length &&
@@ -304,9 +317,6 @@ for (const [klic, obsah] of obsahy) {
       }
       if (polozky.some((p) => prazdny(p.text))) {
         chyba(soubor, id, "5 pořadí", "některá položka má prázdný text");
-      }
-      if (prazdny(otazka.vysvetleniPoradi)) {
-        chyba(soubor, id, "5 pořadí", "chybí vysvetleniPoradi");
       }
     } else {
       chyba(soubor, id, "4 možnosti", "neznámý typ otázky");
@@ -364,6 +374,7 @@ for (const [klic, obsah] of obsahy) {
     kapitola: klic,
     karty: obsah.lekce.length,
     otazky: obsah.otazky.length,
+    poradi: otazekPoradi,
     obtiznost,
     kartyOverit,
     otazkyOverit
@@ -412,12 +423,15 @@ if (chyby.length > 0) {
   proces.exit(1);
 }
 
-const radky: string[][] = [["Kapitola", "Karty", "Otázky", "Obt. 1/2/3", "Karty „overit“", "Otázky „overit“"]];
+const radky: string[][] = [
+  ["Kapitola", "Karty", "Otázky", "z toho pořadí", "Obt. 1/2/3", "Karty „overit“", "Otázky „overit“"]
+];
 for (const s of statistiky) {
   radky.push([
     s.kapitola,
     String(s.karty),
     String(s.otazky),
+    String(s.poradi),
     s.obtiznost.join(" / "),
     String(s.kartyOverit),
     String(s.otazkyOverit)

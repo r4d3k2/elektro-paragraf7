@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 const CESTY = {
   zpet: <polyline points="15 18 9 12 15 6" />,
   vpred: <polyline points="9 18 15 12 9 6" />,
+  nahoru: <polyline points="6 15 12 9 18 15" />,
+  dolu: <polyline points="6 9 12 15 18 9" />,
   sipkaVpravo: <path d="M5 12h14M13 6l6 6-6 6" />,
   sipkaVlevo: <path d="M19 12H5M11 6l-6 6 6 6" />,
   spravne: <polyline points="20 6 9 17 4 12" />,

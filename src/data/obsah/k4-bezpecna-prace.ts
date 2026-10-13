@@ -571,6 +571,27 @@ const obsah: ObsahKapitoly = {
       shrnuti: "Sousední živé části, které nejde odpojit, se zakryjí izolačními kryty nebo zakrývacím materiálem.",
       fakta: ["K4-07", "K4-03", "K4-05"]
     },
+    {
+      id: "k4-q19",
+      kapitola: K,
+      podtema: "pravidla",
+      typ: "poradi",
+      obtiznost: 2,
+      zadani: "Seřaďte pět základních pravidel práce bez napětí tak, jak jdou po sobě.",
+      polozky: [
+        { id: "overeni", text: "Ověření beznapěťového stavu" },
+        { id: "vypnuti", text: "Vypnutí – odpojení ve všech pólech" },
+        { id: "sousedni", text: "Ochrana před sousedními živými částmi" },
+        { id: "uzemneni", text: "Uzemnění a zkratování" },
+        { id: "zajisteni", text: "Zajištění proti opětovnému zapnutí" }
+      ],
+      spravnePoradi: ["vypnuti", "zajisteni", "overeni", "uzemneni", "sousedni"],
+      vysvetleniPoradi:
+        "Nejdřív se místo práce odpojí ve všech pólech a zajistí proti opětovnému zapnutí. Teprve potom se vhodnou zkoušečkou ve všech pólech ověří, že je opravdu bez napětí. Uzemňují a zkratují se až části s ověřeným beznapěťovým stavem. Nakonec se izolačními kryty nebo zakrývacím materiálem ochrání sousední živé části, které nejde odpojit.",
+      shrnuti: "Pět pravidel jde vždy po sobě: vypnutí, zajištění, ověření, uzemnění a zkratování, ochrana před sousedními živými částmi.",
+      fakta: ["K4-03", "K4-04", "K4-07"],
+      ilustrace: "pet-pravidel"
+    },
 
     // ───────── Pásma kolem živých částí ─────────
     {

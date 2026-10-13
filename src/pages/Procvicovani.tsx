@@ -2,7 +2,7 @@
 // Seznam otázek se sestaví při otevření (v pořadí z dat) a během relace se nemění.
 import { useEffect, useMemo, useState } from "react";
 import type { Kapitola } from "../data/kapitoly";
-import type { ObsahKapitoly, OtazkaVyber } from "../data/typy";
+import type { ObsahKapitoly, Otazka } from "../data/typy";
 import { Icon } from "../components/Icon";
 import { Layout } from "../components/Layout";
 import { OtazkaView } from "../components/OtazkaView";
@@ -35,10 +35,9 @@ export function Procvicovani({ kapitola, obsah, dotaz }: Props) {
   const rezim: Rezim = rezimZDotazu === "chyby" || rezimZDotazu === "nove" ? rezimZDotazu : "vse";
   const [kolo, setKolo] = useState(0);
 
-  // Typ „poradi“ přibude ve Fázi 3; teď se procvičují jen otázky „vyber“.
+  // Procvičují se otázky obou typů („vyber“ i „poradi“) v pořadí z dat.
   const vsechny = useMemo(
-    () =>
-      obsah.otazky.filter((o): o is OtazkaVyber => o.typ === "vyber" && (podtema === "" || o.podtema === podtema)),
+    () => obsah.otazky.filter((o) => podtema === "" || o.podtema === podtema),
     [obsah, podtema]
   );
   const idVsech = vsechny.map((o) => o.id);
@@ -119,7 +118,7 @@ export function Procvicovani({ kapitola, obsah, dotaz }: Props) {
 interface SezeniProps {
   kapitola: Kapitola;
   obsah: ObsahKapitoly;
-  vsechny: OtazkaVyber[];
+  vsechny: Otazka[];
   podtema: string;
   rezim: Rezim;
   startId: string | null;
@@ -130,7 +129,7 @@ function Sezeni({ kapitola, obsah, vsechny, podtema, rezim, startId, onZnovu }: 
   const zaklad = `/k/${kapitola.id}`;
 
   // Seznam se „zamrazí“ při začátku relace – zodpovězená otázka z režimu Chyby nebo Nové nezmizí pod rukou.
-  const [seznam] = useState<OtazkaVyber[]>(() => {
+  const [seznam] = useState<Otazka[]>(() => {
     const s = aktualniPokrok();
     if (rezim === "chyby") return vsechny.filter((o) => s.otazky[o.id]?.posledni === "chyba");
     if (rezim === "nove") return vsechny.filter((o) => !s.otazky[o.id]);
@@ -142,7 +141,7 @@ function Sezeni({ kapitola, obsah, vsechny, podtema, rezim, startId, onZnovu }: 
   });
   const [vysledky, setVysledky] = useState<Record<string, boolean>>({});
 
-  const otazka = seznam[index] as OtazkaVyber | undefined;
+  const otazka = seznam[index] as Otazka | undefined;
   const odpovezeno = otazka ? otazka.id in vysledky : false;
   const hotovo = index >= seznam.length;
 
