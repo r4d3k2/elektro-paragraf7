@@ -1,18 +1,22 @@
-// Kořen aplikace: hash routing, vzhled a panel faktů.
-import { useEffect } from "react";
+// Kořen aplikace: hash routing, vzhled, panel faktů a hlášení o nové verzi (PWA).
+import { useEffect, useRef } from "react";
 import { FaktPanelProvider } from "./components/FaktPanel";
-import { Layout } from "./components/Layout";
+import { ID_OBSAHU, Layout } from "./components/Layout";
+import { NovaVerze } from "./components/NovaVerze";
 import { tlacitkoPrimarni } from "./components/styly";
 import { najdiKapitolu, obsahKapitoly } from "./lib/obsah";
 import { usePokrok } from "./lib/progress";
 import { useHashRoute, type Trasa } from "./lib/route";
 import { pouzijVzhled } from "./lib/vzhled";
+import { Chyby } from "./pages/Chyby";
 import { Domu } from "./pages/Domu";
 import { Kapitola } from "./pages/Kapitola";
 import { Nauka } from "./pages/Nauka";
 import { OAplikaci } from "./pages/OAplikaci";
+import { Prehled } from "./pages/Prehled";
 import { Procvicovani } from "./pages/Procvicovani";
 import { TestKapitoly } from "./pages/TestKapitoly";
+import { Zkouska } from "./pages/Zkouska";
 
 function Nenalezeno() {
   return (
@@ -30,6 +34,12 @@ function Stranka({ trasa }: { trasa: Trasa }) {
   const [prvni, id, sekce, parametr] = trasa.cesta;
   if (!prvni) return <Domu />;
   if (prvni === "o-aplikaci" && !id) return <OAplikaci />;
+  if (prvni === "zkouska" && !id) return <Zkouska />;
+  if (prvni === "prehled" && !id) return <Prehled />;
+  if (prvni === "chyby" && (!id || (id === "procvic" && !sekce))) {
+    // key: nové procvičování (jiná kapitola) začíná s čistým stavem.
+    return <Chyby key={`${id ?? ""}|${trasa.dotaz.get("kapitola") ?? ""}`} procvic={id === "procvic"} dotaz={trasa.dotaz} />;
+  }
 
   if (prvni === "k" && id) {
     const kapitola = najdiKapitolu(id);
@@ -50,19 +60,27 @@ export default function App() {
   const trasa = useHashRoute();
   const vzhled = usePokrok().nastaveni.vzhled;
   const cesta = trasa.cesta.join("/");
+  const prvniVykresleni = useRef(true);
 
   useEffect(() => {
     pouzijVzhled(vzhled);
   }, [vzhled]);
 
-  // Při přechodu na jinou stránku začít nahoře (změna jen filtru v dotazu stránku neposouvá).
+  // Při přechodu na jinou stránku začít nahoře (změna jen filtru v dotazu stránku neposouvá)
+  // a přesunout fokus na obsah, aby čtečka obrazovky i klávesnice začaly na nové stránce.
   useEffect(() => {
     window.scrollTo({ top: 0 });
+    if (prvniVykresleni.current) {
+      prvniVykresleni.current = false;
+      return;
+    }
+    document.getElementById(ID_OBSAHU)?.focus({ preventScroll: true });
   }, [cesta]);
 
   return (
     <FaktPanelProvider>
       <Stranka trasa={trasa} />
+      <NovaVerze />
     </FaktPanelProvider>
   );
 }

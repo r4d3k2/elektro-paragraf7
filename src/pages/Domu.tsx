@@ -1,16 +1,35 @@
-// #/ – úvodní obrazovka: Pokračovat a seznam kapitol.
+// #/ – úvodní obrazovka: Pokračovat, zkouška nanečisto, chyby, přehled a seznam kapitol.
 import { KAPITOLY } from "../data/kapitoly";
-import { Icon } from "../components/Icon";
+import { Icon, type NazevIkony } from "../components/Icon";
 import { KapitolaKarta } from "../components/KapitolaKarta";
 import { Layout } from "../components/Layout";
-import { nadpisSekce } from "../components/styly";
-import { popisMista } from "../lib/obsah";
-import { ukladaniDostupne, usePokrok } from "../lib/progress";
+import { nadpisSekce, plocha } from "../components/styly";
+import { procenta, tvar } from "../lib/format";
+import { aktivniKapitoly, popisMista } from "../lib/obsah";
+import { pocetChyb } from "../lib/prehled";
+import { pocetZvladnutych, ukladaniDostupne, usePokrok } from "../lib/progress";
+import { POCET_OTAZEK_ZKOUSKY } from "../lib/zkouska";
+
+function Dlazdice({ href, ikona, nazev, popis }: { href: string; ikona: NazevIkony; nazev: string; popis: string }) {
+  return (
+    <a
+      href={href}
+      className={`${plocha} flex min-h-11 flex-col items-start p-3 transition-colors duration-150 hover:border-primarni active:bg-plocha-2`}
+    >
+      <Icon nazev={ikona} size={22} className="text-primarni" />
+      <span className="mt-1.5 max-w-full text-sm leading-tight font-semibold">{nazev}</span>
+      <span className="mt-0.5 max-w-full truncate font-mono text-xs text-tlumeny">{popis}</span>
+    </a>
+  );
+}
 
 export function Domu() {
   const stav = usePokrok();
   const misto = stav.posledniMisto ? popisMista(stav.posledniMisto) : undefined;
   const prvni = KAPITOLY[0];
+  const chyb = pocetChyb(stav);
+  const idOtazek = aktivniKapitoly().flatMap(({ obsah }) => obsah.otazky.map((o) => o.id));
+  const zvladnuto = procenta(pocetZvladnutych(stav, idOtazek), idOtazek.length);
 
   return (
     <Layout titulek="">
@@ -42,6 +61,17 @@ export function Domu() {
           </span>
         </p>
       )}
+
+      <nav aria-label="Trénink a přehled" className="mt-4 grid grid-cols-3 gap-2.5">
+        <Dlazdice href="#/zkouska" ikona="zkouska" nazev="Zkouška nanečisto" popis={`${POCET_OTAZEK_ZKOUSKY} otázek`} />
+        <Dlazdice
+          href="#/chyby"
+          ikona="chyby"
+          nazev="Opakování chyb"
+          popis={chyb > 0 ? `${chyb} ${tvar(chyb, "otázka", "otázky", "otázek")}` : "žádné"}
+        />
+        <Dlazdice href="#/prehled" ikona="prehled" nazev="Přehled pokroku" popis={`${zvladnuto} %`} />
+      </nav>
 
       <h2 className={`${nadpisSekce} mt-8`}>Kapitoly</h2>
       <ol className="mt-3 space-y-3">
